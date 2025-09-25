@@ -4,7 +4,7 @@ import DatePicker, {
   DateRange,
   DateRangeWithoutDisplayLevel,
 } from "./date_picker";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { addDisplayLevel } from "./lib/dates";
 
 const exampleRanges = [
@@ -14,6 +14,13 @@ const exampleRanges = [
     id: "1",
     type: "favorite",
     username: "Sarah Chen",
+  },
+  {
+    start: new Date(2025, 6, 15),
+    end: new Date(2025, 6, 19),
+    id: "4",
+    type: "favorite",
+    username: "Peter Chin",
   },
   {
     start: new Date(2025, 7, 5),
@@ -45,6 +52,7 @@ export default function Home() {
       (range) => range.username === currentUsername,
     ) as DateRangeWithoutDisplayLevel[];
   });
+  useEffect(() => console.log(otherUserRanges), [otherUserRanges]);
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">

@@ -54,9 +54,8 @@ export const formatDate = (date: Date) => {
         return true
     }
     
-    
     for (const range of ranges){
-        if (range.displayLevel!==null){
+        if (range.displayLevel!=null){
             continue;
         }
         let added = false

@@ -117,6 +117,9 @@ export function DateBox({
           barClasses += "rounded-r ";
         }
         const _maxDisplayLevel = Math.max(maxDisplayLevel, 2);
+        // if (date.getTime() === new Date(2025, 6, 17).getTime()) {
+        //   debugger;
+        // }
 
         return (
           <div
