@@ -1,12 +1,16 @@
 'use client';
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon, XMarkIcon } from '@heroicons/react/24/outline';
+
+export type RangeType = 'strict_no' | 'rather_not' | 'favorite';
 
 export interface DateRange {
   start: Date;
   end: Date;
   id: string;
+  type: RangeType;
+  username: string;
 }
 
 export interface DatePickerProps {
@@ -15,6 +19,7 @@ export interface DatePickerProps {
   minDate?: Date;
   maxDate?: Date;
   className?: string;
+  currentUsername?: string;
 }
 
 const MONTHS = [
@@ -24,17 +29,26 @@ const MONTHS = [
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
+const CURRENT_USER = 'current_user'; // Hardcoded username for demo
+
 export default function DatePicker({
   selectedRanges = [],
   onRangesChange,
   minDate,
   maxDate,
-  className = ''
+  className = '',
+  currentUsername = CURRENT_USER
 }: DatePickerProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isSelecting, setIsSelecting] = useState(false);
-  const [tempRange, setTempRange] = useState<{ start: Date; end?: Date } | null>(null);
+  const [tempRange, setTempRange] = useState<{ start: Date; end?: Date; type: RangeType } | null>(null);
   const [ranges, setRanges] = useState<DateRange[]>(selectedRanges);
+
+  useEffect(() => {
+    console.log('ranges', ranges);
+  }, [ranges]);
+
+  const [selectedType, setSelectedType] = useState<RangeType>('rather_not');
 
   // Generate calendar days for current month
   const calendarDays = useMemo(() => {
@@ -60,31 +74,36 @@ export default function DatePicker({
     return days;
   }, [currentDate]);
 
-  // Check if a date is within any selected range
-  const isDateInRange = useCallback((date: Date) => {
-    return ranges.some(range => 
-      date >= range.start && date <= range.end
-    );
+  // Check if a date is within any selected range and get range details
+  const getDateRangeInfo = useCallback((date: Date): { isInRange: boolean; range?: DateRange } => {
+    for (const range of ranges) {
+      const rangeStart = new Date(range.start);
+      const rangeEnd = new Date(range.end);
+      if (date >= rangeStart && date <= rangeEnd) {
+        return { isInRange: true, range };
+      }
+    }
+    return { isInRange: false };
   }, [ranges]);
 
   // Check if a date is a range start or end
   const isRangeStart = useCallback((date: Date) => {
     return ranges.some(range => 
-      date.getTime() === range.start.getTime()
+      date.getTime() === new Date(range.start).getTime()
     );
   }, [ranges]);
 
   const isRangeEnd = useCallback((date: Date) => {
     return ranges.some(range => 
-      date.getTime() === range.end.getTime()
+      date.getTime() === new Date(range.end).getTime()
     );
   }, [ranges]);
 
   // Check if date is in temp range (currently being selected)
   const isDateInTempRange = useCallback((date: Date) => {
-    if (!tempRange) return false;
-    const start = tempRange.start;
-    const end = tempRange.end || tempRange.start;
+    if (!tempRange || !tempRange.end) return false;
+    const start = new Date(tempRange.start);
+    const end = new Date(tempRange.end);
     const minDate = start < end ? start : end;
     const maxDate = start > end ? start : end;
     return date >= minDate && date <= maxDate;
@@ -104,40 +123,50 @@ export default function DatePicker({
     if (!isSelecting) {
       // Start new range selection
       setIsSelecting(true);
-      setTempRange({ start: date });
-    } else {
+      setTempRange({ start: date, type: selectedType });
+    } else if (tempRange) {
       // Complete range selection
-      if (tempRange) {
-        const start = tempRange.start;
-        const end = date;
-        const newRange: DateRange = {
-          start: start < end ? start : end,
-          end: start > end ? start : end,
-          id: `${Date.now()}-${Math.random()}`
-        };
+      const start = new Date(tempRange.start);
+      const end = new Date(date);
+      const newRange: DateRange = {
+        start: start < end ? start : end,
+        end: start > end ? start : end,
+        id: `${Date.now()}-${Math.random()}`,
+        type: selectedType,
+        username: currentUsername
+      };
 
-        const newRanges = [...ranges, newRange];
-        setRanges(newRanges);
+      setRanges(prevRanges => {
+        const newRanges = [...prevRanges, newRange];
         onRangesChange?.(newRanges);
-      }
+        return newRanges;
+      });
+      
       setIsSelecting(false);
       setTempRange(null);
     }
-  }, [isSelecting, tempRange, ranges, onRangesChange, isDateDisabled]);
+  }, [isSelecting, tempRange, onRangesChange, isDateDisabled, selectedType, currentUsername]);
 
   // Handle date hover (for desktop)
   const handleDateHover = useCallback((date: Date) => {
     if (isSelecting && tempRange && !isDateDisabled(date)) {
-      setTempRange({ ...tempRange, end: date });
+      setTempRange(prev => prev ? { ...prev, end: date } : null);
     }
   }, [isSelecting, tempRange, isDateDisabled]);
 
   // Remove a selected range
   const removeRange = useCallback((rangeId: string) => {
-    const newRanges = ranges.filter(range => range.id !== rangeId);
-    setRanges(newRanges);
-    onRangesChange?.(newRanges);
-  }, [ranges, onRangesChange]);
+    
+    
+    setRanges(prevRanges => {
+      const range = prevRanges.find(r => r.id === rangeId);
+    if (range?.username !== currentUsername) return prevRanges; // Only allow removing own ranges
+
+      const newRanges = prevRanges.filter(range => range.id !== rangeId);
+      onRangesChange?.(newRanges);
+      return newRanges;
+    });
+  }, [onRangesChange, currentUsername]);
 
   // Navigate months
   const goToPreviousMonth = useCallback(() => {
@@ -188,6 +217,43 @@ export default function DatePicker({
         </button>
       </div>
 
+      {/* Range type selector */}
+      <div className="flex gap-2 mb-4">
+        <button
+          onClick={() => setSelectedType('strict_no')}
+          className={`px-3 py-1 rounded-full text-sm ${
+            selectedType === 'strict_no' 
+              ? 'bg-red-600 text-white' 
+              : 'bg-red-100 text-red-800'
+          }`}
+          type="button"
+        >
+          Strict No
+        </button>
+        <button
+          onClick={() => setSelectedType('rather_not')}
+          className={`px-3 py-1 rounded-full text-sm ${
+            selectedType === 'rather_not'
+              ? 'bg-yellow-500 text-white'
+              : 'bg-yellow-100 text-yellow-800'
+          }`}
+          type="button"
+        >
+          Rather Not
+        </button>
+        <button
+          onClick={() => setSelectedType('favorite')}
+          className={`px-3 py-1 rounded-full text-sm ${
+            selectedType === 'favorite'
+              ? 'bg-green-600 text-white'
+              : 'bg-green-100 text-green-800'
+          }`}
+          type="button"
+        >
+          Favorite
+        </button>
+      </div>
+
       {/* Days of week header */}
       <div className="grid grid-cols-7 gap-1 mb-2">
         {DAYS.map(day => (
@@ -204,25 +270,50 @@ export default function DatePicker({
             return <div key={index} className="aspect-square" />;
           }
 
-          const isInRange = isDateInRange(date);
+          const { isInRange, range } = getDateRangeInfo(date);
           const isInTempRange = isDateInTempRange(date);
           const isStart = isRangeStart(date);
           const isEnd = isRangeEnd(date);
           const isDisabled = isDateDisabled(date);
           const isToday = date.toDateString() === new Date().toDateString();
+          const isOtherUser = (range&&range?.username !== currentUsername);
 
-          let cellClasses = 'aspect-square flex items-center justify-center text-sm cursor-pointer transition-all duration-150 touch-manipulation select-none ';
+          let cellClasses = 'aspect-square flex items-center justify-center text-sm cursor-pointer transition-all duration-150 touch-manipulation select-none relative ';
           
           if (isDisabled) {
             cellClasses += 'text-gray-300 cursor-not-allowed ';
           } else if (isStart || isEnd) {
-            cellClasses += 'bg-blue-600 text-white font-semibold rounded-lg ';
-          } else if (isInRange || isInTempRange) {
-            cellClasses += 'bg-blue-100 text-blue-800 ';
+            if (range?.type === 'strict_no') {
+              cellClasses += 'bg-red-600 text-white font-semibold rounded-lg ';
+            } else if (range?.type === 'rather_not') {
+              cellClasses += 'bg-yellow-500 text-white font-semibold rounded-lg ';
+            } else if (range?.type === 'favorite') {
+              cellClasses += 'bg-green-600 text-white font-semibold rounded-lg ';
+            }
+          } else if (isInRange) {
+            if (range?.type === 'strict_no') {
+              cellClasses += 'bg-red-100 text-red-800 ';
+            } else if (range?.type === 'rather_not') {
+              cellClasses += 'bg-yellow-100 text-yellow-800 ';
+            } else if (range?.type === 'favorite') {
+              cellClasses += 'bg-green-100 text-green-800 ';
+            }
+          } else if (isInTempRange) {
+            if (selectedType === 'strict_no') {
+              cellClasses += 'bg-red-100 text-red-800 ';
+            } else if (selectedType === 'rather_not') {
+              cellClasses += 'bg-yellow-100 text-yellow-800 ';
+            } else if (selectedType === 'favorite') {
+              cellClasses += 'bg-green-100 text-green-800 ';
+            }
           } else if (isToday) {
             cellClasses += 'bg-gray-100 text-gray-900 font-semibold rounded-lg ';
           } else {
             cellClasses += 'text-gray-700 hover:bg-gray-50 rounded-lg ';
+          }
+
+          if (isOtherUser) {
+            cellClasses += 'opacity-50 ';
           }
 
           return (
@@ -230,11 +321,16 @@ export default function DatePicker({
               key={date.getTime()}
               onClick={() => handleDateClick(date)}
               onMouseEnter={() => handleDateHover(date)}
-              disabled={isDisabled}
+              disabled={isDisabled || isOtherUser}
               className={cellClasses}
               type="button"
             >
               {date.getDate()}
+              {isInRange && isOtherUser && (
+                <span className="absolute inset-0 flex items-center justify-center text-[8px] text-gray-600">
+                  {range?.username}
+                </span>
+              )}
             </button>
           );
         })}
@@ -268,23 +364,41 @@ export default function DatePicker({
       {ranges.length > 0 && (
         <div className="space-y-2">
           <h3 className="text-sm font-medium text-gray-700">Selected Ranges:</h3>
-          {ranges.map(range => (
-            <div
-              key={range.id}
-              className="flex items-center justify-between p-2 bg-gray-50 rounded-lg border"
-            >
-              <span className="text-sm text-gray-700">
-                {formatDate(range.start)} - {formatDate(range.end)}
-              </span>
-              <button
-                onClick={() => removeRange(range.id)}
-                className="text-gray-400 hover:text-red-600 transition-colors touch-manipulation"
-                type="button"
+          {ranges.map(range => {
+            let rangeClasses = 'flex items-center justify-between p-2 rounded-lg border ';
+            if (range.type === 'strict_no') {
+              rangeClasses += 'bg-red-50 border-red-200';
+            } else if (range.type === 'rather_not') {
+              rangeClasses += 'bg-yellow-50 border-yellow-200';
+            } else if (range.type === 'favorite') {
+              rangeClasses += 'bg-green-50 border-green-200';
+            }
+
+            return (
+              <div
+                key={range.id}
+                className={rangeClasses}
               >
-                <XMarkIcon className="w-4 h-4" />
-              </button>
-            </div>
-          ))}
+                <div className="flex flex-col">
+                  <span className="text-sm text-gray-700">
+                    {formatDate(range.start)} - {formatDate(range.end)}
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    by {range.username}
+                  </span>
+                </div>
+                {range.username === currentUsername && (
+                  <button
+                    onClick={() => removeRange(range.id)}
+                    className="text-gray-400 hover:text-red-600 transition-colors touch-manipulation"
+                    type="button"
+                  >
+                    <XMarkIcon className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

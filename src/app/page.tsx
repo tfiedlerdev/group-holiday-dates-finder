@@ -1,11 +1,38 @@
+"use client";
 import Image from "next/image";
-import DatePicker from "./date_picker";
+import DatePicker, { DateRange } from "./date_picker";
+import { useState } from "react";
 
 export default function Home() {
+  const [selectedRanges, setSelectedRanges] = useState<DateRange[]>([ {
+    start: new Date(2025, 6, 15),
+    end: new Date(2025, 6, 20),
+    id: '1',
+    type: 'favorite',
+    username: 'Sarah Chen'
+  },
+  {
+    start: new Date(2025, 7, 5), 
+    end: new Date(2025, 7, 10),
+    id: '2',
+    type: 'strict_no',
+    username: 'Michael Rodriguez'
+  },
+  {
+    start: new Date(2025, 8, 15),
+    end: new Date(2025, 8, 20), 
+    id: '3',
+    type: 'rather_not',
+    username: 'Emma Thompson'
+  }]);
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <DatePicker />
+        <DatePicker selectedRanges={selectedRanges} 
+        onRangesChange={setSelectedRanges}
+        minDate={new Date(2025, 6, 1)}
+        maxDate={new Date(2025, 8, 30)}
+        />
       </main>
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
         <a
