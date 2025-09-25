@@ -2,8 +2,8 @@
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { RangeType, RangeTypeSelector } from './components/range_type_selector';
 
-export type RangeType = 'strict_no' | 'rather_not' | 'favorite';
 
 export interface DateRange {
   start: Date;
@@ -217,42 +217,7 @@ export default function DatePicker({
         </button>
       </div>
 
-      {/* Range type selector */}
-      <div className="flex gap-2 mb-4">
-        <button
-          onClick={() => setSelectedType('strict_no')}
-          className={`px-3 py-1 rounded-full text-sm ${
-            selectedType === 'strict_no' 
-              ? 'bg-red-600 text-white' 
-              : 'bg-red-100 text-red-800'
-          }`}
-          type="button"
-        >
-          Strict No
-        </button>
-        <button
-          onClick={() => setSelectedType('rather_not')}
-          className={`px-3 py-1 rounded-full text-sm ${
-            selectedType === 'rather_not'
-              ? 'bg-yellow-500 text-white'
-              : 'bg-yellow-100 text-yellow-800'
-          }`}
-          type="button"
-        >
-          Rather Not
-        </button>
-        <button
-          onClick={() => setSelectedType('favorite')}
-          className={`px-3 py-1 rounded-full text-sm ${
-            selectedType === 'favorite'
-              ? 'bg-green-600 text-white'
-              : 'bg-green-100 text-green-800'
-          }`}
-          type="button"
-        >
-          Favorite
-        </button>
-      </div>
+     <RangeTypeSelector selectedType={selectedType} setSelectedType={setSelectedType} />
 
       {/* Days of week header */}
       <div className="grid grid-cols-7 gap-1 mb-2">
@@ -276,13 +241,13 @@ export default function DatePicker({
           const isEnd = isRangeEnd(date);
           const isDisabled = isDateDisabled(date);
           const isToday = date.toDateString() === new Date().toDateString();
-          const isOtherUser = (range&&range?.username !== currentUsername);
+          const isOtherUser = range?.username !== currentUsername;
 
           let cellClasses = 'aspect-square flex items-center justify-center text-sm cursor-pointer transition-all duration-150 touch-manipulation select-none relative ';
           
           if (isDisabled) {
             cellClasses += 'text-gray-300 cursor-not-allowed ';
-          } else if (isStart || isEnd) {
+          } else if (!isOtherUser && (isStart || isEnd)) {
             if (range?.type === 'strict_no') {
               cellClasses += 'bg-red-600 text-white font-semibold rounded-lg ';
             } else if (range?.type === 'rather_not') {
@@ -290,7 +255,7 @@ export default function DatePicker({
             } else if (range?.type === 'favorite') {
               cellClasses += 'bg-green-600 text-white font-semibold rounded-lg ';
             }
-          } else if (isInRange) {
+          } else if (!isOtherUser && isInRange) {
             if (range?.type === 'strict_no') {
               cellClasses += 'bg-red-100 text-red-800 ';
             } else if (range?.type === 'rather_not') {
@@ -312,24 +277,30 @@ export default function DatePicker({
             cellClasses += 'text-gray-700 hover:bg-gray-50 rounded-lg ';
           }
 
-          if (isOtherUser) {
-            cellClasses += 'opacity-50 ';
-          }
-
           return (
             <button
               key={date.getTime()}
               onClick={() => handleDateClick(date)}
               onMouseEnter={() => handleDateHover(date)}
-              disabled={isDisabled || isOtherUser}
+              disabled={isDisabled}
               className={cellClasses}
               type="button"
             >
               {date.getDate()}
-              {isInRange && isOtherUser && (
-                <span className="absolute inset-0 flex items-center justify-center text-[8px] text-gray-600">
-                  {range?.username}
-                </span>
+              {isOtherUser && isInRange && (
+                <div 
+                  className={`absolute bottom-0 left-0 right-0 h-1 ${
+                    range?.type === 'strict_no' 
+                      ? 'bg-red-200' 
+                      : range?.type === 'rather_not'
+                      ? 'bg-yellow-200'
+                      : 'bg-green-200'
+                  }`}
+                >
+                  <span className="absolute -top-4 left-0 right-0 text-[8px] text-gray-400 text-center">
+                    {range?.username}
+                  </span>
+                </div>
               )}
             </button>
           );
@@ -361,10 +332,10 @@ export default function DatePicker({
       )}
 
       {/* Selected ranges */}
-      {ranges.length > 0 && (
+      {ranges.filter(r => r.username === currentUsername).length > 0 && (
         <div className="space-y-2">
-          <h3 className="text-sm font-medium text-gray-700">Selected Ranges:</h3>
-          {ranges.map(range => {
+          <h3 className="text-sm font-medium text-gray-700">Your Selected Ranges:</h3>
+          {ranges.filter(r => r.username === currentUsername).map(range => {
             let rangeClasses = 'flex items-center justify-between p-2 rounded-lg border ';
             if (range.type === 'strict_no') {
               rangeClasses += 'bg-red-50 border-red-200';
@@ -383,19 +354,14 @@ export default function DatePicker({
                   <span className="text-sm text-gray-700">
                     {formatDate(range.start)} - {formatDate(range.end)}
                   </span>
-                  <span className="text-xs text-gray-500">
-                    by {range.username}
-                  </span>
                 </div>
-                {range.username === currentUsername && (
-                  <button
-                    onClick={() => removeRange(range.id)}
-                    className="text-gray-400 hover:text-red-600 transition-colors touch-manipulation"
-                    type="button"
-                  >
-                    <XMarkIcon className="w-4 h-4" />
-                  </button>
-                )}
+                <button
+                  onClick={() => removeRange(range.id)}
+                  className="text-gray-400 hover:text-red-600 transition-colors touch-manipulation"
+                  type="button"
+                >
+                  <XMarkIcon className="w-4 h-4" />
+                </button>
               </div>
             );
           })}
