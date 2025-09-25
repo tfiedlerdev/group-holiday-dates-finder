@@ -1,0 +1,42 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Poll model for group holiday date finding
+model Poll {
+  id          String   @id @default(cuid())
+  title       String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  startDate   DateTime?
+  endDate     DateTime?
+  
+  // Relations
+  dateRanges  DateRange[]
+  
+  @@map("polls")
+}
+
+// Date ranges that can be selected in a poll
+model DateRange {
+  id          String   @id @default(cuid())
+  pollId      String
+  startDate   DateTime
+  endDate     DateTime
+  isAvailable Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  userName    String
+  
+  // Relations
+  poll        Poll     @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  
+  @@map("date_ranges")
+}

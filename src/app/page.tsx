@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Calendar } from "primereact/calendar";
 
 import Image from "next/image";
+import Button from "@mui/material/Button";
 
 export default function Home() {
   const [dates, setDates] = useState<(Date | null)[] | null>([
@@ -27,9 +28,13 @@ export default function Home() {
             showWeek
           />
         </div>
-        <button className="fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-[90%] bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-8 rounded-lg text-lg transition-colors">
+        <Button
+          variant="contained"
+          className="fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-[90%] py-4 px-8 text-lg"
+          loading={false}
+        >
           Create Poll
-        </button>
+        </Button>
       </main>
     </div>
   );

@@ -4,14 +4,26 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "build": "prisma generate && next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@heroicons/react": "^2.2.0",
+    "@mui/lab": "^7.0.0-beta.17",
+    "@mui/material": "^7.3.2",
+    "@prisma/client": "^6.16.2",
     "next": "15.5.4",
     "primereact": "^10.9.7",
+    "prisma": "^6.16.2",
     "react": "19.1.0",
     "react-dom": "19.1.0"
   },
@@ -28,6 +40,6 @@
     "prettier": "^3.6.2",
     "prettier-eslint": "^16.4.2",
     "tailwindcss": "^4",
-    "typescript": "^4.9.5"
+    "typescript": "^5.9.2"
   }
 }
