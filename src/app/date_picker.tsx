@@ -72,6 +72,11 @@ export default function DatePicker({
   } | null>(null);
 
   const [selectedType, setSelectedType] = useState<RangeType>("rather_not");
+  const maxDisplayLevel = useMemo(() => {
+    return userRanges.reduce((max, range) => {
+      return Math.max(max, range.displayLevel ?? 0);
+    }, 0);
+  }, [userRanges]);
 
   // Generate calendar days for current month
   const calendarDays = useMemo(() => {
@@ -276,6 +281,7 @@ export default function DatePicker({
               disabled={isDateDisabled(date)}
               onHover={() => handleDateHover(date)}
               onClick={() => handleDateClick(date)}
+              maxDisplayLevel={maxDisplayLevel}
             />
           ) : (
             <div className="aspect-square" key={index} />

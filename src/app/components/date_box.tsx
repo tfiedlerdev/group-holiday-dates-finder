@@ -28,6 +28,7 @@ export function DateBox({
   onClick,
   userRanges,
   otherUserRanges,
+  maxDisplayLevel,
 }: {
   date: Date;
   currentUsername: string;
@@ -38,6 +39,7 @@ export function DateBox({
   onClick: () => void;
   userRanges: DateRangeWithoutDisplayLevel[];
   otherUserRanges: DateRange[];
+  maxDisplayLevel: number;
 }) {
   const userRangeOfDate = useMemo(() => {
     const range = getRangesOfDate(date, userRanges)[0];
@@ -51,28 +53,19 @@ export function DateBox({
   const isStart = userRangeOfDate ? isRangeStart(date, userRangeOfDate) : false;
   const isEnd = userRangeOfDate ? isRangeEnd(date, userRangeOfDate) : false;
   const isToday = date.toDateString() === new Date().toDateString();
-  const isOtherUser = userRangeOfDate?.username !== currentUsername;
 
   let cellClasses =
     "aspect-square flex items-center justify-center text-sm cursor-pointer transition-all duration-150 touch-manipulation select-none relative ";
 
   if (disabled) {
     cellClasses += "text-gray-300 cursor-not-allowed ";
-  } else if (!isOtherUser && (isStart || isEnd)) {
+  } else if (isStart || isEnd) {
     if (userRangeOfDate?.type === "strict_no") {
       cellClasses += "bg-red-600 text-white font-semibold rounded-lg ";
     } else if (userRangeOfDate?.type === "rather_not") {
       cellClasses += "bg-yellow-500 text-white font-semibold rounded-lg ";
     } else if (userRangeOfDate?.type === "favorite") {
       cellClasses += "bg-green-600 text-white font-semibold rounded-lg ";
-    }
-  } else if (!isOtherUser && userRangeOfDate != null) {
-    if (userRangeOfDate?.type === "strict_no") {
-      cellClasses += "bg-red-100 text-red-800 ";
-    } else if (userRangeOfDate?.type === "rather_not") {
-      cellClasses += "bg-yellow-100 text-yellow-800 ";
-    } else if (userRangeOfDate?.type === "favorite") {
-      cellClasses += "bg-green-100 text-green-800 ";
     }
   } else if (isInTempRange) {
     if (selectedType === "strict_no") {
@@ -97,27 +90,38 @@ export function DateBox({
       type="button"
     >
       {date.getDate()}
-      {isOtherUser && userRangeOfDate != null && (
-        <div
-          className={`pointer-events-none absolute inset-0 ${
-            userRangeOfDate?.type === "strict_no"
-              ? "bg-red-200/50"
-              : userRangeOfDate?.type === "rather_not"
-                ? "bg-yellow-200/50"
-                : "bg-green-200/50"
-          } ${isStart ? "rounded-l-lg" : ""} ${isEnd ? "rounded-r-lg" : ""}`}
-        >
-          {date.getTime() ===
-            getMiddleDate(
-              userRangeOfDate!.start,
-              userRangeOfDate!.end,
-            ).getTime() && (
-            <span className="absolute -top-4 left-0 right-0 text-[8px] text-gray-400 text-center">
-              {userRangeOfDate?.username}
-            </span>
-          )}
-        </div>
-      )}
+      {otherUserRangesOfDate.map((range, index) => {
+        const isRangeStart = date.getTime() === range.start.getTime();
+        const isRangeEnd = date.getTime() === range.end.getTime();
+
+        let barClasses = "absolute left-0 right-0 h-1.5 opacity-40 ";
+
+        if (range.type === "strict_no") {
+          barClasses += "bg-red-600 ";
+        } else if (range.type === "rather_not") {
+          barClasses += "bg-yellow-500 ";
+        } else if (range.type === "favorite") {
+          barClasses += "bg-green-600 ";
+        }
+
+        if (isRangeStart) {
+          barClasses += "rounded-l ";
+        }
+        if (isRangeEnd) {
+          barClasses += "rounded-r ";
+        }
+
+        return (
+          <div
+            key={range.id}
+            className={barClasses}
+            style={{
+              top: `${((range.displayLevel || 0) + 1) * 20}%`,
+              zIndex: maxDisplayLevel - (range.displayLevel || 0),
+            }}
+          />
+        );
+      })}
     </button>
   );
 }
