@@ -13,8 +13,8 @@ export function RangeTypeSelector({
         onClick={() => setSelectedType("strict_no")}
         className={`px-3 py-1 rounded-full text-sm ${
           selectedType === "strict_no"
-            ? "bg-red-600 text-white"
-            : "bg-red-100 text-red-800"
+            ? "border-3 border-red-600 text-red-800"
+            : "border border-red-100 text-red-800"
         }`}
         type="button"
       >
@@ -24,8 +24,8 @@ export function RangeTypeSelector({
         onClick={() => setSelectedType("rather_not")}
         className={`px-3 py-1 rounded-full text-sm ${
           selectedType === "rather_not"
-            ? "bg-yellow-500 text-white"
-            : "bg-yellow-100 text-yellow-800"
+            ? "border-3 border-yellow-500 text-yellow-800"
+            : "border border-yellow-100 text-yellow-800"
         }`}
         type="button"
       >
@@ -35,8 +35,8 @@ export function RangeTypeSelector({
         onClick={() => setSelectedType("favorite")}
         className={`px-3 py-1 rounded-full text-sm ${
           selectedType === "favorite"
-            ? "bg-green-600 text-white"
-            : "bg-green-100 text-green-800"
+            ? "border-3 border-green-600 text-green-800"
+            : "border border-green-100 text-green-800"
         }`}
         type="button"
       >

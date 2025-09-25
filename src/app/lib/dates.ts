@@ -82,4 +82,9 @@ export const formatDate = (date: Date) => {
     }
 
 
-  
+  export const  getRangesOfDate = (
+    date: Date,
+    ranges: DateRangeWithoutDisplayLevel[],
+  ) => {
+    return ranges.filter((range) => date >= range.start && date <= range.end);
+  };

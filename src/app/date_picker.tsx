@@ -10,7 +10,7 @@ import React, {
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { RangeType, RangeTypeSelector } from "./components/range_type_selector";
 import { SelectionStatus } from "./components/selection_status";
-import { addDisplayLevel, formatDate } from "./lib/dates";
+import { addDisplayLevel, formatDate, getRangesOfDate } from "./lib/dates";
 import { SelectedRanges } from "./components/selected_ranges";
 import { DateBox } from "./components/date_box";
 
@@ -124,6 +124,7 @@ export default function DatePicker({
   const handleDateClick = useCallback(
     (date: Date) => {
       if (isDateDisabled(date)) return;
+      if (getRangesOfDate(date, userRanges).length > 0) return;
 
       if (!isSelecting) {
         // Start new range selection
@@ -163,17 +164,23 @@ export default function DatePicker({
       isDateDisabled,
       selectedType,
       currentUsername,
+      userRanges,
     ],
   );
 
   // Handle date hover (for desktop)
   const handleDateHover = useCallback(
     (date: Date) => {
-      if (isSelecting && tempRange && !isDateDisabled(date)) {
+      if (
+        isSelecting &&
+        tempRange &&
+        !isDateDisabled(date) &&
+        getRangesOfDate(date, userRanges).length === 0
+      ) {
         setTempRange((prev) => (prev ? { ...prev, end: date } : null));
       }
     },
-    [isSelecting, tempRange, isDateDisabled],
+    [isSelecting, tempRange, isDateDisabled, userRanges],
   );
 
   // Remove a selected range

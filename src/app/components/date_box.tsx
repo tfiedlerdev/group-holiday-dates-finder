@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { DateRange, DateRangeWithoutDisplayLevel } from "../date_picker";
 import { RangeType } from "./range_type_selector";
+import { getRangesOfDate } from "../lib/dates";
 const getMiddleDate = (start: Date, end: Date) => {
   const diffTime = Math.abs(end.getTime() - start.getTime());
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -15,13 +16,6 @@ const isRangeStart = (date: Date, range: DateRangeWithoutDisplayLevel) => {
 
 const isRangeEnd = (date: Date, range: DateRangeWithoutDisplayLevel) => {
   return date.getTime() === new Date(range.end).getTime();
-};
-
-const getRangesOfDate = (
-  date: Date,
-  ranges: DateRangeWithoutDisplayLevel[],
-) => {
-  return ranges.filter((range) => date >= range.start && date <= range.end);
 };
 
 export function DateBox({
