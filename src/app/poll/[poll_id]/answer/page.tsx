@@ -3,9 +3,9 @@ import Image from "next/image";
 import DatePicker, {
   DateRange,
   DateRangeWithoutDisplayLevel,
-} from "../../date_picker";
+} from "../../../date_picker";
 import { useEffect, useMemo, useState } from "react";
-import { addDisplayLevel } from "../../lib/dates";
+import { addDisplayLevel } from "../../../lib/dates";
 
 const exampleRanges = [
   {
