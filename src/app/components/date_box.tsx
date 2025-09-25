@@ -119,7 +119,14 @@ export function DateBox({
               top: `${((range.displayLevel || 0) + 1) * 20}%`,
               zIndex: maxDisplayLevel - (range.displayLevel || 0),
             }}
-          />
+          >
+            {date.getTime() ===
+              getMiddleDate(range.start, range.end).getTime() && (
+              <span className="text-[10px] font-medium text-black absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap">
+                {range.username}
+              </span>
+            )}
+          </div>
         );
       })}
     </button>
