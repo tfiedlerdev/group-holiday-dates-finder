@@ -1,8 +1,11 @@
 'use client';
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { ChevronLeftIcon, ChevronRightIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { RangeType, RangeTypeSelector } from './components/range_type_selector';
+import { SelectionStatus } from './components/selection_status';
+import { formatDate } from './lib/dates';
+import { SelectedRanges } from './components/selected_ranges';
 
 
 export interface DateRange {
@@ -183,13 +186,14 @@ export default function DatePicker({
     setTempRange(null);
   }, []);
 
-  // Format date for display
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
+  
+
+  // Get middle date of a range
+  const getMiddleDate = (start: Date, end: Date) => {
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const middleDays = Math.floor(diffDays / 2);
+    return new Date(start.getTime() + middleDays * 24 * 60 * 60 * 1000);
   };
 
   return (
@@ -229,7 +233,7 @@ export default function DatePicker({
       </div>
 
       {/* Calendar grid */}
-      <div className="grid grid-cols-7 gap-1 mb-4">
+      <div className="grid grid-cols-7 gap-1 mb-4 relative">
         {calendarDays.map((date, index) => {
           if (!date) {
             return <div key={index} className="aspect-square" />;
@@ -289,17 +293,19 @@ export default function DatePicker({
               {date.getDate()}
               {isOtherUser && isInRange && (
                 <div 
-                  className={`absolute bottom-0 left-0 right-0 h-1 ${
+                  className={`pointer-events-none absolute inset-0 ${
                     range?.type === 'strict_no' 
-                      ? 'bg-red-200' 
+                      ? 'bg-red-200/50' 
                       : range?.type === 'rather_not'
-                      ? 'bg-yellow-200'
-                      : 'bg-green-200'
-                  }`}
+                      ? 'bg-yellow-200/50'
+                      : 'bg-green-200/50'
+                  } ${isStart ? 'rounded-l-lg' : ''} ${isEnd ? 'rounded-r-lg' : ''}`}
                 >
-                  <span className="absolute -top-4 left-0 right-0 text-[8px] text-gray-400 text-center">
-                    {range?.username}
-                  </span>
+                  {date.getTime() === getMiddleDate(range!.start, range!.end).getTime() && (
+                    <span className="absolute -top-4 left-0 right-0 text-[8px] text-gray-400 text-center">
+                      {range?.username}
+                    </span>
+                  )}
                 </div>
               )}
             </button>
@@ -308,65 +314,13 @@ export default function DatePicker({
       </div>
 
       {/* Selection status */}
-      {isSelecting && (
-        <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-blue-800">
-              {tempRange?.end 
-                ? `${formatDate(tempRange.start)} - ${formatDate(tempRange.end)}`
-                : `Starting: ${formatDate(tempRange!.start)}`
-              }
-            </span>
-            <button
-              onClick={cancelSelection}
-              className="text-blue-600 hover:text-blue-800 transition-colors"
-              type="button"
-            >
-              <XMarkIcon className="w-4 h-4" />
-            </button>
-          </div>
-          <p className="text-xs text-blue-600 mt-1">
-            {tempRange?.end ? 'Click to confirm selection' : 'Select end date'}
-          </p>
-        </div>
-      )}
+        {isSelecting && tempRange && (
+          <SelectionStatus tempRange={tempRange} formatDate={formatDate} cancelSelection={cancelSelection} />
+         
+      )}  
 
       {/* Selected ranges */}
-      {ranges.filter(r => r.username === currentUsername).length > 0 && (
-        <div className="space-y-2">
-          <h3 className="text-sm font-medium text-gray-700">Your Selected Ranges:</h3>
-          {ranges.filter(r => r.username === currentUsername).map(range => {
-            let rangeClasses = 'flex items-center justify-between p-2 rounded-lg border ';
-            if (range.type === 'strict_no') {
-              rangeClasses += 'bg-red-50 border-red-200';
-            } else if (range.type === 'rather_not') {
-              rangeClasses += 'bg-yellow-50 border-yellow-200';
-            } else if (range.type === 'favorite') {
-              rangeClasses += 'bg-green-50 border-green-200';
-            }
-
-            return (
-              <div
-                key={range.id}
-                className={rangeClasses}
-              >
-                <div className="flex flex-col">
-                  <span className="text-sm text-gray-700">
-                    {formatDate(range.start)} - {formatDate(range.end)}
-                  </span>
-                </div>
-                <button
-                  onClick={() => removeRange(range.id)}
-                  className="text-gray-400 hover:text-red-600 transition-colors touch-manipulation"
-                  type="button"
-                >
-                  <XMarkIcon className="w-4 h-4" />
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      <SelectedRanges ranges={ranges} onRangeRemove={removeRange} currentUsername={currentUsername} />
     </div>
   );
 }
