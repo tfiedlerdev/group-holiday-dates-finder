@@ -65,6 +65,14 @@ export function DateBox({
     } else if (userRangeOfDate?.type === "favorite") {
       cellClasses += "bg-green-600 text-white font-semibold rounded-lg ";
     }
+  } else if (userRangeOfDate) {
+    if (userRangeOfDate.type === "strict_no") {
+      cellClasses += "bg-red-100 text-red-800 ";
+    } else if (userRangeOfDate.type === "rather_not") {
+      cellClasses += "bg-yellow-100 text-yellow-800 ";
+    } else if (userRangeOfDate.type === "favorite") {
+      cellClasses += "bg-green-100 text-green-800 ";
+    }
   } else if (isInTempRange) {
     if (selectedType === "strict_no") {
       cellClasses += "bg-red-100 text-red-800 ";
@@ -108,15 +116,16 @@ export function DateBox({
         if (isRangeEnd) {
           barClasses += "rounded-r ";
         }
+        const _maxDisplayLevel = Math.max(maxDisplayLevel, 2);
 
         return (
           <div
             key={range.id}
             className={barClasses}
             style={{
-              top: `${((range.displayLevel || 0) / (maxDisplayLevel + 1)) * 100}%`,
-              height: `${100 / (maxDisplayLevel + 1)}%`,
-              zIndex: maxDisplayLevel - (range.displayLevel || 0),
+              top: `${((range.displayLevel || 0) / (_maxDisplayLevel + 1)) * 100}%`,
+              height: `${100 / (_maxDisplayLevel + 1)}%`,
+              zIndex: _maxDisplayLevel - (range.displayLevel || 0),
             }}
           >
             {date.getTime() ===

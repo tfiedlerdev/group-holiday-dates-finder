@@ -10,7 +10,7 @@ import React, {
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { RangeType, RangeTypeSelector } from "./components/range_type_selector";
 import { SelectionStatus } from "./components/selection_status";
-import { addDisplayLevel, formatDate, getRangesOfDate } from "./lib/dates";
+import { formatDate, getRangesOfDate } from "./lib/dates";
 import { SelectedRanges } from "./components/selected_ranges";
 import { DateBox } from "./components/date_box";
 
@@ -73,10 +73,10 @@ export default function DatePicker({
 
   const [selectedType, setSelectedType] = useState<RangeType>("rather_not");
   const maxDisplayLevel = useMemo(() => {
-    return userRanges.reduce((max, range) => {
+    return otherUserRanges.reduce((max, range) => {
       return Math.max(max, range.displayLevel ?? 0);
     }, 0);
-  }, [userRanges]);
+  }, [otherUserRanges]);
 
   // Generate calendar days for current month
   const calendarDays = useMemo(() => {
@@ -153,7 +153,7 @@ export default function DatePicker({
           if (alreadyAdded) {
             return prevRanges;
           }
-          const newRanges = addDisplayLevel([...prevRanges, newRange]);
+          const newRanges = [...prevRanges, newRange];
           onUserRangesChange(newRanges);
           return newRanges;
         });
