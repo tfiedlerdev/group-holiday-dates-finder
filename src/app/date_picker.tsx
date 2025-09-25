@@ -273,7 +273,6 @@ export default function DatePicker({
             <DateBox
               key={date.getTime()}
               date={date}
-              currentUsername={currentUsername}
               isInTempRange={isDateInTempRange(date)}
               selectedType={selectedType}
               userRanges={userRanges}

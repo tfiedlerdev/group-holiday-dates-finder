@@ -20,7 +20,6 @@ const isRangeEnd = (date: Date, range: DateRangeWithoutDisplayLevel) => {
 
 export function DateBox({
   date,
-  currentUsername,
   isInTempRange,
   selectedType,
   disabled,
@@ -31,7 +30,6 @@ export function DateBox({
   maxDisplayLevel,
 }: {
   date: Date;
-  currentUsername: string;
   isInTempRange: boolean;
   selectedType: RangeType;
   disabled: boolean;
@@ -90,11 +88,11 @@ export function DateBox({
       type="button"
     >
       {date.getDate()}
-      {otherUserRangesOfDate.map((range, index) => {
+      {otherUserRangesOfDate.map((range) => {
         const isRangeStart = date.getTime() === range.start.getTime();
         const isRangeEnd = date.getTime() === range.end.getTime();
 
-        let barClasses = "absolute left-0 right-0 h-1.5 opacity-40 ";
+        let barClasses = "absolute left-0 right-0 opacity-40 ";
 
         if (range.type === "strict_no") {
           barClasses += "bg-red-600 ";
@@ -116,7 +114,8 @@ export function DateBox({
             key={range.id}
             className={barClasses}
             style={{
-              top: `${((range.displayLevel || 0) + 1) * 20}%`,
+              top: `${((range.displayLevel || 0) / (maxDisplayLevel + 1)) * 100}%`,
+              height: `${100 / (maxDisplayLevel + 1)}%`,
               zIndex: maxDisplayLevel - (range.displayLevel || 0),
             }}
           >
