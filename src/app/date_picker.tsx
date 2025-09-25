@@ -1,57 +1,77 @@
-'use client';
+"use client";
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
-import { RangeType, RangeTypeSelector } from './components/range_type_selector';
-import { SelectionStatus } from './components/selection_status';
-import { formatDate } from './lib/dates';
-import { SelectedRanges } from './components/selected_ranges';
+import React, {
+  useState,
+  useCallback,
+  useMemo,
+  SetStateAction,
+  Dispatch,
+} from "react";
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import { RangeType, RangeTypeSelector } from "./components/range_type_selector";
+import { SelectionStatus } from "./components/selection_status";
+import { addDisplayLevel, formatDate } from "./lib/dates";
+import { SelectedRanges } from "./components/selected_ranges";
+import { DateBox } from "./components/date_box";
 
-
-export interface DateRange {
+export interface DateRangeWithoutDisplayLevel {
   start: Date;
   end: Date;
   id: string;
   type: RangeType;
   username: string;
+  displayLevel: number | null;
 }
 
+export type DateRange = DateRangeWithoutDisplayLevel & {
+  displayLevel: number;
+};
+
 export interface DatePickerProps {
-  selectedRanges?: DateRange[];
-  onRangesChange?: (ranges: DateRange[]) => void;
+  userRanges: DateRangeWithoutDisplayLevel[];
+  otherUserRanges: DateRange[];
+  onUserRangesChange: Dispatch<SetStateAction<DateRangeWithoutDisplayLevel[]>>;
   minDate?: Date;
   maxDate?: Date;
   className?: string;
-  currentUsername?: string;
+  currentUsername: string;
 }
 
 const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-const CURRENT_USER = 'current_user'; // Hardcoded username for demo
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export default function DatePicker({
-  selectedRanges = [],
-  onRangesChange,
+  userRanges,
+  otherUserRanges,
+  onUserRangesChange,
   minDate,
   maxDate,
-  className = '',
-  currentUsername = CURRENT_USER
+  className = "",
+  currentUsername,
 }: DatePickerProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isSelecting, setIsSelecting] = useState(false);
-  const [tempRange, setTempRange] = useState<{ start: Date; end?: Date; type: RangeType } | null>(null);
-  const [ranges, setRanges] = useState<DateRange[]>(selectedRanges);
+  const [tempRange, setTempRange] = useState<{
+    start: Date;
+    end?: Date;
+    type: RangeType;
+  } | null>(null);
 
-  useEffect(() => {
-    console.log('ranges', ranges);
-  }, [ranges]);
-
-  const [selectedType, setSelectedType] = useState<RangeType>('rather_not');
+  const [selectedType, setSelectedType] = useState<RangeType>("rather_not");
 
   // Generate calendar days for current month
   const calendarDays = useMemo(() => {
@@ -77,107 +97,111 @@ export default function DatePicker({
     return days;
   }, [currentDate]);
 
-  // Check if a date is within any selected range and get range details
-  const getDateRangeInfo = useCallback((date: Date): { isInRange: boolean; range?: DateRange } => {
-    for (const range of ranges) {
-      const rangeStart = new Date(range.start);
-      const rangeEnd = new Date(range.end);
-      if (date >= rangeStart && date <= rangeEnd) {
-        return { isInRange: true, range };
-      }
-    }
-    return { isInRange: false };
-  }, [ranges]);
-
-  // Check if a date is a range start or end
-  const isRangeStart = useCallback((date: Date) => {
-    return ranges.some(range => 
-      date.getTime() === new Date(range.start).getTime()
-    );
-  }, [ranges]);
-
-  const isRangeEnd = useCallback((date: Date) => {
-    return ranges.some(range => 
-      date.getTime() === new Date(range.end).getTime()
-    );
-  }, [ranges]);
-
   // Check if date is in temp range (currently being selected)
-  const isDateInTempRange = useCallback((date: Date) => {
-    if (!tempRange || !tempRange.end) return false;
-    const start = new Date(tempRange.start);
-    const end = new Date(tempRange.end);
-    const minDate = start < end ? start : end;
-    const maxDate = start > end ? start : end;
-    return date >= minDate && date <= maxDate;
-  }, [tempRange]);
+  const isDateInTempRange = useCallback(
+    (date: Date) => {
+      if (!tempRange || !tempRange.end) return false;
+      const start = new Date(tempRange.start);
+      const end = new Date(tempRange.end);
+      const minDate = start < end ? start : end;
+      const maxDate = start > end ? start : end;
+      return date >= minDate && date <= maxDate;
+    },
+    [tempRange],
+  );
 
   // Check if date is disabled
-  const isDateDisabled = useCallback((date: Date) => {
-    if (minDate && date < minDate) return true;
-    if (maxDate && date > maxDate) return true;
-    return false;
-  }, [minDate, maxDate]);
+  const isDateDisabled = useCallback(
+    (date: Date) => {
+      if (minDate && date < minDate) return true;
+      if (maxDate && date > maxDate) return true;
+      return false;
+    },
+    [minDate, maxDate],
+  );
 
   // Handle date click/tap
-  const handleDateClick = useCallback((date: Date) => {
-    if (isDateDisabled(date)) return;
+  const handleDateClick = useCallback(
+    (date: Date) => {
+      if (isDateDisabled(date)) return;
 
-    if (!isSelecting) {
-      // Start new range selection
-      setIsSelecting(true);
-      setTempRange({ start: date, type: selectedType });
-    } else if (tempRange) {
-      // Complete range selection
-      const start = new Date(tempRange.start);
-      const end = new Date(date);
-      const newRange: DateRange = {
-        start: start < end ? start : end,
-        end: start > end ? start : end,
-        id: `${Date.now()}-${Math.random()}`,
-        type: selectedType,
-        username: currentUsername
-      };
+      if (!isSelecting) {
+        // Start new range selection
+        setIsSelecting(true);
+        setTempRange({ start: date, type: selectedType });
+      } else if (tempRange) {
+        // Complete range selection
+        const start = new Date(tempRange.start);
+        const end = new Date(date);
+        const newRange: DateRangeWithoutDisplayLevel = {
+          start: start < end ? start : end,
+          end: start > end ? start : end,
+          id: `${Date.now()}-${Math.random()}`,
+          type: selectedType,
+          username: currentUsername,
+          displayLevel: null,
+        };
 
-      setRanges(prevRanges => {
-        const newRanges = [...prevRanges, newRange];
-        onRangesChange?.(newRanges);
-        return newRanges;
-      });
-      
-      setIsSelecting(false);
-      setTempRange(null);
-    }
-  }, [isSelecting, tempRange, onRangesChange, isDateDisabled, selectedType, currentUsername]);
+        onUserRangesChange((prevRanges) => {
+          const alreadyAdded = prevRanges.find((r) => r.id === newRange.id);
+          if (alreadyAdded) {
+            return prevRanges;
+          }
+          const newRanges = addDisplayLevel([...prevRanges, newRange]);
+          onUserRangesChange(newRanges);
+          return newRanges;
+        });
+
+        setIsSelecting(false);
+        setTempRange(null);
+      }
+    },
+    [
+      isSelecting,
+      tempRange,
+      onUserRangesChange,
+      isDateDisabled,
+      selectedType,
+      currentUsername,
+    ],
+  );
 
   // Handle date hover (for desktop)
-  const handleDateHover = useCallback((date: Date) => {
-    if (isSelecting && tempRange && !isDateDisabled(date)) {
-      setTempRange(prev => prev ? { ...prev, end: date } : null);
-    }
-  }, [isSelecting, tempRange, isDateDisabled]);
+  const handleDateHover = useCallback(
+    (date: Date) => {
+      if (isSelecting && tempRange && !isDateDisabled(date)) {
+        setTempRange((prev) => (prev ? { ...prev, end: date } : null));
+      }
+    },
+    [isSelecting, tempRange, isDateDisabled],
+  );
 
   // Remove a selected range
-  const removeRange = useCallback((rangeId: string) => {
-    
-    
-    setRanges(prevRanges => {
-      const range = prevRanges.find(r => r.id === rangeId);
-    if (range?.username !== currentUsername) return prevRanges; // Only allow removing own ranges
+  const removeRange = useCallback(
+    (rangeId: string) => {
+      onUserRangesChange((prevRanges) => {
+        const range = prevRanges.find((r) => r.id === rangeId);
+        if (range?.username !== currentUsername) return prevRanges; // Only allow removing own ranges
 
-      const newRanges = prevRanges.filter(range => range.id !== rangeId);
-      onRangesChange?.(newRanges);
-      return newRanges;
-    });
-  }, [onRangesChange, currentUsername]);
+        const newRanges = prevRanges.filter((range) => range.id !== rangeId);
+        onUserRangesChange(newRanges);
+        return newRanges;
+      });
+    },
+    [onUserRangesChange, currentUsername],
+  );
 
   // Navigate months
   const goToPreviousMonth = useCallback(() => {
-    setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+    setCurrentDate(
+      (prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1),
+    );
   }, []);
 
   const goToNextMonth = useCallback(() => {
-    setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+    setCurrentDate(
+      (prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1),
+    );
   }, []);
 
   // Cancel current selection
@@ -186,18 +210,10 @@ export default function DatePicker({
     setTempRange(null);
   }, []);
 
-  
-
-  // Get middle date of a range
-  const getMiddleDate = (start: Date, end: Date) => {
-    const diffTime = Math.abs(end.getTime() - start.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    const middleDays = Math.floor(diffDays / 2);
-    return new Date(start.getTime() + middleDays * 24 * 60 * 60 * 1000);
-  };
-
   return (
-    <div className={`bg-white rounded-lg shadow-lg border border-gray-200 p-4 max-w-sm mx-auto ${className}`}>
+    <div
+      className={`bg-white rounded-lg shadow-lg border border-gray-200 p-4 max-w-sm mx-auto ${className}`}
+    >
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <button
@@ -207,11 +223,11 @@ export default function DatePicker({
         >
           <ChevronLeftIcon className="w-5 h-5 text-gray-600" />
         </button>
-        
+
         <h2 className="text-lg font-semibold text-gray-900">
           {MONTHS[currentDate.getMonth()]} {currentDate.getFullYear()}
         </h2>
-        
+
         <button
           onClick={goToNextMonth}
           className="p-2 hover:bg-gray-100 rounded-lg transition-colors touch-manipulation"
@@ -221,12 +237,18 @@ export default function DatePicker({
         </button>
       </div>
 
-     <RangeTypeSelector selectedType={selectedType} setSelectedType={setSelectedType} />
+      <RangeTypeSelector
+        selectedType={selectedType}
+        setSelectedType={setSelectedType}
+      />
 
       {/* Days of week header */}
       <div className="grid grid-cols-7 gap-1 mb-2">
-        {DAYS.map(day => (
-          <div key={day} className="text-center text-sm font-medium text-gray-500 py-2">
+        {DAYS.map((day) => (
+          <div
+            key={day}
+            className="text-center text-sm font-medium text-gray-500 py-2"
+          >
             {day}
           </div>
         ))}
@@ -235,92 +257,40 @@ export default function DatePicker({
       {/* Calendar grid */}
       <div className="grid grid-cols-7 gap-1 mb-4 relative">
         {calendarDays.map((date, index) => {
-          if (!date) {
-            return <div key={index} className="aspect-square" />;
-          }
-
-          const { isInRange, range } = getDateRangeInfo(date);
-          const isInTempRange = isDateInTempRange(date);
-          const isStart = isRangeStart(date);
-          const isEnd = isRangeEnd(date);
-          const isDisabled = isDateDisabled(date);
-          const isToday = date.toDateString() === new Date().toDateString();
-          const isOtherUser = range?.username !== currentUsername;
-
-          let cellClasses = 'aspect-square flex items-center justify-center text-sm cursor-pointer transition-all duration-150 touch-manipulation select-none relative ';
-          
-          if (isDisabled) {
-            cellClasses += 'text-gray-300 cursor-not-allowed ';
-          } else if (!isOtherUser && (isStart || isEnd)) {
-            if (range?.type === 'strict_no') {
-              cellClasses += 'bg-red-600 text-white font-semibold rounded-lg ';
-            } else if (range?.type === 'rather_not') {
-              cellClasses += 'bg-yellow-500 text-white font-semibold rounded-lg ';
-            } else if (range?.type === 'favorite') {
-              cellClasses += 'bg-green-600 text-white font-semibold rounded-lg ';
-            }
-          } else if (!isOtherUser && isInRange) {
-            if (range?.type === 'strict_no') {
-              cellClasses += 'bg-red-100 text-red-800 ';
-            } else if (range?.type === 'rather_not') {
-              cellClasses += 'bg-yellow-100 text-yellow-800 ';
-            } else if (range?.type === 'favorite') {
-              cellClasses += 'bg-green-100 text-green-800 ';
-            }
-          } else if (isInTempRange) {
-            if (selectedType === 'strict_no') {
-              cellClasses += 'bg-red-100 text-red-800 ';
-            } else if (selectedType === 'rather_not') {
-              cellClasses += 'bg-yellow-100 text-yellow-800 ';
-            } else if (selectedType === 'favorite') {
-              cellClasses += 'bg-green-100 text-green-800 ';
-            }
-          } else if (isToday) {
-            cellClasses += 'bg-gray-100 text-gray-900 font-semibold rounded-lg ';
-          } else {
-            cellClasses += 'text-gray-700 hover:bg-gray-50 rounded-lg ';
-          }
-
-          return (
-            <button
+          return date ? (
+            <DateBox
               key={date.getTime()}
+              date={date}
+              currentUsername={currentUsername}
+              isInTempRange={isDateInTempRange(date)}
+              selectedType={selectedType}
+              userRanges={userRanges}
+              otherUserRanges={otherUserRanges}
+              disabled={isDateDisabled(date)}
+              onHover={() => handleDateHover(date)}
               onClick={() => handleDateClick(date)}
-              onMouseEnter={() => handleDateHover(date)}
-              disabled={isDisabled}
-              className={cellClasses}
-              type="button"
-            >
-              {date.getDate()}
-              {isOtherUser && isInRange && (
-                <div 
-                  className={`pointer-events-none absolute inset-0 ${
-                    range?.type === 'strict_no' 
-                      ? 'bg-red-200/50' 
-                      : range?.type === 'rather_not'
-                      ? 'bg-yellow-200/50'
-                      : 'bg-green-200/50'
-                  } ${isStart ? 'rounded-l-lg' : ''} ${isEnd ? 'rounded-r-lg' : ''}`}
-                >
-                  {date.getTime() === getMiddleDate(range!.start, range!.end).getTime() && (
-                    <span className="absolute -top-4 left-0 right-0 text-[8px] text-gray-400 text-center">
-                      {range?.username}
-                    </span>
-                  )}
-                </div>
-              )}
-            </button>
+            />
+          ) : (
+            <div className="aspect-square" key={index} />
           );
         })}
       </div>
 
       {/* Selection status */}
-        {isSelecting && tempRange && (
-          <SelectionStatus tempRange={tempRange} formatDate={formatDate} cancelSelection={cancelSelection} />
-         
-      )}  
+      {isSelecting && tempRange && (
+        <SelectionStatus
+          tempRange={tempRange}
+          formatDate={formatDate}
+          cancelSelection={cancelSelection}
+        />
+      )}
 
       {/* Selected ranges */}
-      <SelectedRanges ranges={ranges} onRangeRemove={removeRange} currentUsername={currentUsername} />
+      <SelectedRanges
+        ranges={userRanges}
+        onRangeRemove={removeRange}
+        currentUsername={currentUsername}
+      />
     </div>
   );
 }
