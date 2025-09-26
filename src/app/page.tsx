@@ -32,7 +32,7 @@ export default function Home() {
       const data = await response.json();
 
       if (data.success) {
-        router.push(`/poll/${data.poll.id}/land`);
+        router.push(`/poll/${data.poll.id}/answer`);
       } else {
         console.error("Failed to create poll:", data.error);
       }
