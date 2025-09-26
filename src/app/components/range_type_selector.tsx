@@ -10,7 +10,7 @@ export function RangeTypeSelector({
   onlyLegend?: boolean;
 }) {
   return (
-    <div className="flex gap-2 mb-4">
+    <div className="flex gap-2 mb-4 range-type-selector">
       {onlyLegend ? (
         <>
           <div className="px-3 py-1 rounded-full text-sm bg-red-100 text-red-800 border border-red-200">

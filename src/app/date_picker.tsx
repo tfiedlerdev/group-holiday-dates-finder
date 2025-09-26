@@ -6,6 +6,7 @@ import React, {
   useMemo,
   SetStateAction,
   Dispatch,
+  useEffect,
 } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { RangeTypeSelector } from "./components/range_type_selector";
@@ -13,7 +14,18 @@ import { RangeType } from "@prisma/client";
 import { getRangesOfDate } from "./lib/dates";
 import { SelectedRanges } from "./components/selected_ranges";
 import { DateBox } from "./components/date_box";
+import Tour from "@reactour/tour";
 
+const steps = [
+  {
+    selector: ".range-type-selector",
+    content: "Select the type of the range you want to add",
+  },
+  {
+    selector: ".date-range-picker",
+    content: "Select date ranges by clicking on the dates",
+  },
+];
 export interface DateRangeWithoutDisplayLevel {
   start: Date;
   end: Date;
@@ -77,6 +89,17 @@ export default function DatePicker({
       return Math.max(max, range.displayLevel ?? 0);
     }, 0);
   }, [otherUserRanges]);
+
+  const [isTourOpen, setIsTourOpen] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [disabledActions, setDisabledActions] = useState(false);
+  useEffect(() => {
+    const hasSeenTour = false; //localStorage.getItem("hasSeenDatePickerTour");
+    if (!hasSeenTour && currentUsername) {
+      setIsTourOpen(true);
+      localStorage.setItem("hasSeenDatePickerTour", "true");
+    }
+  }, [currentUsername]);
 
   // Generate calendar days for current month
   const calendarDays = useMemo(() => {
@@ -243,88 +266,107 @@ export default function DatePicker({
   }, [currentDate, maxDate]);
 
   return (
-    <div
-      className={`bg-white rounded-lg shadow-lg border border-gray-200 p-4 max-w-sm mx-auto ${className}`}
-    >
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <button
-          onClick={goToPreviousMonth}
-          disabled={isPreviousMonthDisabled}
-          className={`p-2 rounded-lg transition-colors touch-manipulation ${
-            isPreviousMonthDisabled
-              ? "opacity-50 cursor-not-allowed"
-              : "hover:bg-gray-100"
-          }`}
-          type="button"
-        >
-          <ChevronLeftIcon className="w-5 h-5 text-gray-600" />
-        </button>
-
-        <h2 className="text-lg font-semibold text-gray-900">
-          {MONTHS[currentDate.getMonth()]} {currentDate.getFullYear()}
-        </h2>
-
-        <button
-          onClick={goToNextMonth}
-          disabled={isNextMonthDisabled}
-          className={`p-2 rounded-lg transition-colors touch-manipulation ${
-            isNextMonthDisabled
-              ? "opacity-50 cursor-not-allowed"
-              : "hover:bg-gray-100"
-          }`}
-          type="button"
-        >
-          <ChevronRightIcon className="w-5 h-5 text-gray-600" />
-        </button>
-      </div>
-
-      <RangeTypeSelector
-        onlyLegend={currentUsername == null}
-        selectedType={selectedType}
-        setSelectedType={setSelectedType}
-      />
-
-      {/* Days of week header */}
-      <div className="grid grid-cols-7 gap-1 mb-2">
-        {DAYS.map((day) => (
-          <div
-            key={day}
-            className="text-center text-sm font-medium text-gray-500 py-2"
+    <>
+      <div
+        className={`bg-white rounded-lg shadow-lg border border-gray-200 p-4 max-w-sm mx-auto ${className}`}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4">
+          <button
+            onClick={goToPreviousMonth}
+            disabled={isPreviousMonthDisabled}
+            className={`p-2 rounded-lg transition-colors touch-manipulation ${
+              isPreviousMonthDisabled
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:bg-gray-100"
+            }`}
+            type="button"
           >
-            {day}
-          </div>
-        ))}
-      </div>
+            <ChevronLeftIcon className="w-5 h-5 text-gray-600" />
+          </button>
 
-      {/* Calendar grid */}
-      <div className="grid grid-cols-7 gap-1 mb-4 relative">
-        {calendarDays.map((date, index) => {
-          return date ? (
-            <DateBox
-              key={date.getTime()}
-              date={date}
-              isInTempRange={isDateInTempRange(date)}
-              selectedType={selectedType}
-              userRanges={userRanges}
-              otherUserRanges={otherUserRanges}
-              disabled={isDateDisabled(date) || !currentUsername}
-              onHover={() => handleDateHover(date)}
-              onClick={() => handleDateClick(date)}
-              maxDisplayLevel={maxDisplayLevel}
-            />
-          ) : (
-            <div className="aspect-square" key={index} />
-          );
-        })}
-      </div>
+          <h2 className="text-lg font-semibold text-gray-900">
+            {MONTHS[currentDate.getMonth()]} {currentDate.getFullYear()}
+          </h2>
 
-      {/* Selected ranges */}
-      <SelectedRanges
-        ranges={userRanges}
-        onRangeRemove={removeRange}
-        currentUsername={currentUsername}
-      />
-    </div>
+          <button
+            onClick={goToNextMonth}
+            disabled={isNextMonthDisabled}
+            className={`p-2 rounded-lg transition-colors touch-manipulation ${
+              isNextMonthDisabled
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:bg-gray-100"
+            }`}
+            type="button"
+          >
+            <ChevronRightIcon className="w-5 h-5 text-gray-600" />
+          </button>
+        </div>
+
+        <RangeTypeSelector
+          onlyLegend={currentUsername == null}
+          selectedType={selectedType}
+          setSelectedType={setSelectedType}
+        />
+
+        {/* Days of week header */}
+        <div className="grid grid-cols-7 gap-1 mb-2 ">
+          {DAYS.map((day) => (
+            <div
+              key={day}
+              className="text-center text-sm font-medium text-gray-500 py-2"
+            >
+              {day}
+            </div>
+          ))}
+        </div>
+
+        {/* Calendar grid */}
+        <div className="grid grid-cols-7 gap-1 mb-4 relative date-range-picker">
+          {calendarDays.map((date, index) => {
+            return date ? (
+              <DateBox
+                key={date.getTime()}
+                date={date}
+                isInTempRange={isDateInTempRange(date)}
+                selectedType={selectedType}
+                userRanges={userRanges}
+                otherUserRanges={otherUserRanges}
+                disabled={isDateDisabled(date) || !currentUsername}
+                onHover={() => handleDateHover(date)}
+                onClick={() => handleDateClick(date)}
+                maxDisplayLevel={maxDisplayLevel}
+              />
+            ) : (
+              <div className="aspect-square" key={index} />
+            );
+          })}
+        </div>
+
+        {/* Selected ranges */}
+        <SelectedRanges
+          ranges={userRanges}
+          onRangeRemove={removeRange}
+          currentUsername={currentUsername}
+        />
+      </div>
+      {isTourOpen && (
+        <Tour
+          styles={{
+            popover: (base) => ({
+              ...base,
+              color: "black",
+            }),
+          }}
+          steps={steps}
+          isOpen={isTourOpen}
+          setIsOpen={setIsTourOpen}
+          setCurrentStep={setCurrentStep}
+          currentStep={currentStep}
+          disabledActions={disabledActions}
+          setDisabledActions={setDisabledActions}
+        />
+      )}
+    </>
   );
 }
