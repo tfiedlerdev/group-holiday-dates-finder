@@ -94,7 +94,7 @@ export default function DatePicker({
   const [currentStep, setCurrentStep] = useState(0);
   const [disabledActions, setDisabledActions] = useState(false);
   useEffect(() => {
-    const hasSeenTour = false; //localStorage.getItem("hasSeenDatePickerTour");
+    const hasSeenTour = localStorage.getItem("hasSeenDatePickerTour");
     if (!hasSeenTour && currentUsername) {
       setIsTourOpen(true);
       localStorage.setItem("hasSeenDatePickerTour", "true");
