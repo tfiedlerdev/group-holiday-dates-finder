@@ -8,16 +8,26 @@ export const formatDate = (date: Date) => {
     });
   };
 
-  const getMinMaxDate = (ranges: DateRangeWithoutDisplayLevel[]) => ({
+  const getMinMaxDate = (ranges: DateRangeWithoutDisplayLevel[]) => {
+    if (ranges.length === 0) {
+      return {
+        minDate: undefined,
+        maxDate: undefined,
+      };
+    }
+    return ({
     minDate: ranges.reduce((min, range) => range.start < min.start ? range : min, ranges[0]).start,
     maxDate: ranges.reduce((max, range) => range.end > max.end ? range : max, ranges[0]).end
-  });
+  })};
 
 
 
   export const addDisplayLevel = (ranges: (DateRangeWithoutDisplayLevel)[]) => {
     type Level = (string | null)[]
     const { minDate, maxDate } = getMinMaxDate(ranges);
+    if (minDate === undefined || maxDate === undefined) {
+      return ranges;
+    }
     const dayMs = 1000 * 60 * 60 * 24;
     const getEmptyLevel = ()=>Array(Math.ceil((maxDate.getTime() - minDate.getTime()) / dayMs)).fill(null)
     const getLevelIndexForDate = (date: Date) => Math.floor((date.getTime() - minDate.getTime()) / dayMs)

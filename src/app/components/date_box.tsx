@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { DateRange, DateRangeWithoutDisplayLevel } from "../date_picker";
-import { RangeType } from "./range_type_selector";
 import { getRangesOfDate } from "../lib/dates";
+import { RangeType } from "@prisma/client";
 const getMiddleDate = (start: Date, end: Date) => {
   const diffTime = Math.abs(end.getTime() - start.getTime());
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -134,7 +134,7 @@ export function DateBox({
             {date.getTime() ===
               getMiddleDate(range.start, range.end).getTime() && (
               <span className="text-[10px] font-medium text-black absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap">
-                {range.username}
+                {range.userName}
               </span>
             )}
           </div>

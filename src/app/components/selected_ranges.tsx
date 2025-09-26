@@ -14,13 +14,13 @@ export function SelectedRanges({
   return (
     <>
       (
-      {ranges.filter((r) => r.username === currentUsername).length > 0 && (
+      {ranges.filter((r) => r.userName === currentUsername).length > 0 && (
         <div className="space-y-2">
           <h3 className="text-sm font-medium text-gray-700">
             Your Selected Ranges:
           </h3>
           {ranges
-            .filter((r) => r.username === currentUsername)
+            .filter((r) => r.userName === currentUsername)
             .map((range) => {
               let rangeClasses =
                 "flex items-center justify-between p-2 rounded-lg border ";

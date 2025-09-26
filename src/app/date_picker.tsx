@@ -8,7 +8,8 @@ import React, {
   Dispatch,
 } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
-import { RangeType, RangeTypeSelector } from "./components/range_type_selector";
+import { RangeTypeSelector } from "./components/range_type_selector";
+import { RangeType } from "@prisma/client";
 import { getRangesOfDate } from "./lib/dates";
 import { SelectedRanges } from "./components/selected_ranges";
 import { DateBox } from "./components/date_box";
@@ -18,7 +19,7 @@ export interface DateRangeWithoutDisplayLevel {
   end: Date;
   id: string;
   type: RangeType;
-  username: string;
+  userName: string;
   displayLevel: number | null;
 }
 
@@ -62,7 +63,7 @@ export default function DatePicker({
   className = "",
   currentUsername,
 }: DatePickerProps) {
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState(minDate || new Date());
   const [isSelecting, setIsSelecting] = useState(false);
   const [tempRange, setTempRange] = useState<{
     start: Date;
@@ -145,7 +146,7 @@ export default function DatePicker({
           end: start > end ? start : end,
           id: `${Date.now()}-${Math.random()}`,
           type: selectedType,
-          username: currentUsername,
+          userName: currentUsername,
           displayLevel: null,
         };
 
@@ -194,7 +195,7 @@ export default function DatePicker({
     (rangeId: string) => {
       onUserRangesChange((prevRanges) => {
         const range = prevRanges.find((r) => r.id === rangeId);
-        if (range?.username !== currentUsername) return prevRanges; // Only allow removing own ranges
+        if (range?.userName !== currentUsername) return prevRanges; // Only allow removing own ranges
 
         const newRanges = prevRanges.filter((range) => range.id !== rangeId);
         onUserRangesChange(newRanges);

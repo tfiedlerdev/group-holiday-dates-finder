@@ -1,4 +1,4 @@
-export type RangeType = "strict_no" | "rather_not" | "favorite";
+import { RangeType } from "@prisma/client";
 
 export function RangeTypeSelector({
   selectedType,

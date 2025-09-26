@@ -3,10 +3,10 @@ import { prisma } from '@/app/lib/prisma';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { poll_id: string } }
+  { params }: { params: Promise<{ poll_id: string }> }
 ) {
   try {
-    const pollId = params.poll_id;
+    const { poll_id: pollId } = await params;
 
     const poll = await prisma.poll.findUnique({
       where: {
