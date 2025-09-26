@@ -152,33 +152,46 @@ export default function Home() {
             onUsernameSelect={handleUsernameSelect}
           />
         ) : (
-          <Button
-            variant="contained"
-            startIcon={<CheckIcon />}
-            disabled={
-              userRanges.length ===
-              poll.dateRanges.filter((r) => r.userName === currentUsername)
-                .length
-            }
-            onClick={async () => {
-              setIsSubmitting(true);
-              await submitRanges(pollId, currentUsername, userRanges);
-              setCurrentUsername(undefined);
-              await fetchPollAndUpdateStates(pollId);
-              setIsSubmitting(false);
-            }}
-            sx={{
-              backgroundColor: "primary.main",
-              "&:hover": {
-                backgroundColor: "primary.dark",
-              },
-            }}
-            loading={isSubmitting}
-          >
-            {isSubmitting
-              ? "Submitting..."
-              : `Submit Changes for ${currentUsername}`}
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Button
+              variant="outlined"
+              color="secondary"
+              fullWidth
+              onClick={() => {
+                setCurrentUsername(undefined);
+              }}
+            >
+              Discard Changes
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<CheckIcon />}
+              fullWidth
+              disabled={
+                userRanges.length ===
+                poll.dateRanges.filter((r) => r.userName === currentUsername)
+                  .length
+              }
+              onClick={async () => {
+                setIsSubmitting(true);
+                await submitRanges(pollId, currentUsername, userRanges);
+                setCurrentUsername(undefined);
+                await fetchPollAndUpdateStates(pollId);
+                setIsSubmitting(false);
+              }}
+              sx={{
+                backgroundColor: "primary.main",
+                "&:hover": {
+                  backgroundColor: "primary.dark",
+                },
+              }}
+              loading={isSubmitting}
+            >
+              {isSubmitting
+                ? "Submitting..."
+                : `Submit Changes for ${currentUsername}`}
+            </Button>
+          </div>
         )}
       </main>
     </div>

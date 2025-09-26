@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import { Autocomplete } from "@mui/material";
 import { TextField } from "@mui/material";
-import { useState, useRef } from "react";
+import { useState } from "react";
 
 export function NameDialogButton({
   existingUsernames,
@@ -18,7 +18,7 @@ export function NameDialogButton({
   onUsernameSelect: (username: string | null) => void;
 }) {
   const [isUsernameDialogOpen, setIsUsernameDialogOpen] = useState(false);
-  const userTextInputRef = useRef<string | null>(null);
+  const [userInput, setUserInput] = useState("");
 
   return (
     <>
@@ -54,7 +54,7 @@ export function NameDialogButton({
                 margin="normal"
                 variant="outlined"
                 onChange={(e) => {
-                  userTextInputRef.current = e.target.value;
+                  setUserInput(e.target.value);
                 }}
               />
             )}
@@ -73,14 +73,17 @@ export function NameDialogButton({
           </Button>
           <Button
             onClick={() => {
-              const input = userTextInputRef.current;
-              const value = input?.trim() || "";
+              const value = userInput.trim();
               onUsernameSelect(value);
               setIsUsernameDialogOpen(false);
             }}
+            disabled={!userInput.trim()}
             sx={{
               color: "primary.main",
               backgroundColor: "white",
+              "&.Mui-disabled": {
+                color: "rgba(0, 0, 0, 0.26)", // Makes disabled text visible
+              },
             }}
           >
             Confirm
