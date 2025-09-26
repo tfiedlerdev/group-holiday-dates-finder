@@ -9,8 +9,7 @@ import React, {
 } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { RangeType, RangeTypeSelector } from "./components/range_type_selector";
-import { SelectionStatus } from "./components/selection_status";
-import { formatDate, getRangesOfDate } from "./lib/dates";
+import { getRangesOfDate } from "./lib/dates";
 import { SelectedRanges } from "./components/selected_ranges";
 import { DateBox } from "./components/date_box";
 
@@ -34,7 +33,7 @@ export interface DatePickerProps {
   minDate?: Date;
   maxDate?: Date;
   className?: string;
-  currentUsername: string;
+  currentUsername?: string;
 }
 
 const MONTHS = [
@@ -130,6 +129,7 @@ export default function DatePicker({
   const handleDateClick = useCallback(
     (date: Date) => {
       if (isDateDisabled(date)) return;
+      if (!currentUsername) return;
       if (getRangesOfDate(date, userRanges).length > 0) return;
 
       if (!isSelecting) {
@@ -217,12 +217,6 @@ export default function DatePicker({
     );
   }, []);
 
-  // Cancel current selection
-  const cancelSelection = useCallback(() => {
-    setIsSelecting(false);
-    setTempRange(null);
-  }, []);
-
   return (
     <div
       className={`bg-white rounded-lg shadow-lg border border-gray-200 p-4 max-w-sm mx-auto ${className}`}
@@ -251,6 +245,7 @@ export default function DatePicker({
       </div>
 
       <RangeTypeSelector
+        onlyLegend={currentUsername == null}
         selectedType={selectedType}
         setSelectedType={setSelectedType}
       />
@@ -278,7 +273,7 @@ export default function DatePicker({
               selectedType={selectedType}
               userRanges={userRanges}
               otherUserRanges={otherUserRanges}
-              disabled={isDateDisabled(date)}
+              disabled={isDateDisabled(date) || !currentUsername}
               onHover={() => handleDateHover(date)}
               onClick={() => handleDateClick(date)}
               maxDisplayLevel={maxDisplayLevel}
@@ -288,15 +283,6 @@ export default function DatePicker({
           );
         })}
       </div>
-
-      {/* Selection status */}
-      {isSelecting && tempRange && (
-        <SelectionStatus
-          tempRange={tempRange}
-          formatDate={formatDate}
-          cancelSelection={cancelSelection}
-        />
-      )}
 
       {/* Selected ranges */}
       <SelectedRanges

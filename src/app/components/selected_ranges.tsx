@@ -9,7 +9,7 @@ export function SelectedRanges({
 }: {
   ranges: DateRangeWithoutDisplayLevel[];
   onRangeRemove: (rangeId: string) => void;
-  currentUsername: string;
+  currentUsername?: string;
 }) {
   return (
     <>

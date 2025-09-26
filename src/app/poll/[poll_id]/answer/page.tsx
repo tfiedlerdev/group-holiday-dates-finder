@@ -38,7 +38,7 @@ const exampleRanges = [
   },
 ] as DateRange[];
 
-const CURRENT_USER = "current_user"; // Hardcoded username for demo
+const CURRENT_USER = undefined; //"current_user"; // Hardcoded username for demo
 
 export default function Home() {
   const currentUsername = CURRENT_USER;
