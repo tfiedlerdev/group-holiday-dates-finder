@@ -5,7 +5,7 @@ import DatePicker, {
 } from "../../../date_picker";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { addDisplayLevel } from "../../../lib/dates";
-import { Button, Typography } from "@mui/material";
+import { Button, CircularProgress, Typography } from "@mui/material";
 import { useParams } from "next/navigation";
 import { DateRange as PrismaDateRange } from "@prisma/client";
 import { NameDialogButton } from "@/app/components/name_dialog_button";
@@ -118,7 +118,11 @@ export default function Home() {
   };
 
   if (!poll) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <CircularProgress />
+      </div>
+    );
   }
 
   return (
