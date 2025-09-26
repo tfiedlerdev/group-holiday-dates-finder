@@ -331,7 +331,7 @@ export default function DatePicker({
                 isInTempRange={isDateInTempRange(date)}
                 selectedType={selectedType}
                 userRanges={userRanges}
-                otherUserRanges={otherUserRanges}
+                otherUserRanges={currentUsername ? [] : otherUserRanges}
                 disabled={isDateDisabled(date) || !currentUsername}
                 onHover={() => handleDateHover(date)}
                 onClick={() => handleDateClick(date)}
