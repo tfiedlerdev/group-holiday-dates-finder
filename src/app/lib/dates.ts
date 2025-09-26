@@ -29,7 +29,7 @@ export const formatDate = (date: Date) => {
       return ranges;
     }
     const dayMs = 1000 * 60 * 60 * 24;
-    const getEmptyLevel = ()=>Array(Math.ceil((maxDate.getTime() - minDate.getTime()) / dayMs)).fill(null)
+    const getEmptyLevel = ()=>Array(Math.ceil((maxDate.getTime() - minDate.getTime()) / dayMs)+1).fill(null)
     const getLevelIndexForDate = (date: Date) => Math.floor((date.getTime() - minDate.getTime()) / dayMs)
 
     const rangeIdToLevel: { [key: string]: number } = {}
@@ -65,6 +65,9 @@ export const formatDate = (date: Date) => {
     }
     
     for (const range of ranges){
+        // if(range.userName==="micha"){
+        //     debugger;
+        // }
         if (range.displayLevel!=null){
             continue;
         }
