@@ -121,6 +121,25 @@ export function DateBox({
         //   debugger;
         // }
 
+        const showUsername = (() => {
+          const daysBetween = Math.floor(
+            (range.end.getTime() - range.start.getTime()) /
+              (1000 * 60 * 60 * 24),
+          );
+          if (daysBetween < 8) {
+            return (
+              date.getTime() === getMiddleDate(range.start, range.end).getTime()
+            );
+          }
+          const daysSinceStart = Math.floor(
+            (date.getTime() - range.start.getTime()) / (1000 * 60 * 60 * 24),
+          );
+          return (
+            (daysSinceStart + 2) % 4 === 0 &&
+            date.getTime() < range.end.getTime()
+          );
+        })();
+
         return (
           <div
             key={range.id}
@@ -131,8 +150,7 @@ export function DateBox({
               zIndex: _maxDisplayLevel - (range.displayLevel || 0),
             }}
           >
-            {date.getTime() ===
-              getMiddleDate(range.start, range.end).getTime() && (
+            {showUsername && (
               <span className="text-[10px] font-medium text-black absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap">
                 {range.userName}
               </span>
