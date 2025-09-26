@@ -220,6 +220,28 @@ export default function DatePicker({
     );
   }, []);
 
+  const isPreviousMonthDisabled = useMemo(() => {
+    if (!minDate) return false;
+
+    const lastDayOfPreviousMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      0,
+    );
+    return lastDayOfPreviousMonth < minDate;
+  }, [currentDate, minDate]);
+
+  const isNextMonthDisabled = useMemo(() => {
+    if (!maxDate) return false;
+
+    const firstDayOfNextMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() + 1,
+      1,
+    );
+    return firstDayOfNextMonth > maxDate;
+  }, [currentDate, maxDate]);
+
   return (
     <div
       className={`bg-white rounded-lg shadow-lg border border-gray-200 p-4 max-w-sm mx-auto ${className}`}
@@ -228,7 +250,12 @@ export default function DatePicker({
       <div className="flex items-center justify-between mb-4">
         <button
           onClick={goToPreviousMonth}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors touch-manipulation"
+          disabled={isPreviousMonthDisabled}
+          className={`p-2 rounded-lg transition-colors touch-manipulation ${
+            isPreviousMonthDisabled
+              ? "opacity-50 cursor-not-allowed"
+              : "hover:bg-gray-100"
+          }`}
           type="button"
         >
           <ChevronLeftIcon className="w-5 h-5 text-gray-600" />
@@ -240,7 +267,12 @@ export default function DatePicker({
 
         <button
           onClick={goToNextMonth}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors touch-manipulation"
+          disabled={isNextMonthDisabled}
+          className={`p-2 rounded-lg transition-colors touch-manipulation ${
+            isNextMonthDisabled
+              ? "opacity-50 cursor-not-allowed"
+              : "hover:bg-gray-100"
+          }`}
           type="button"
         >
           <ChevronRightIcon className="w-5 h-5 text-gray-600" />
