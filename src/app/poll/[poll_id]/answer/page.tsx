@@ -169,6 +169,7 @@ export default function Home() {
                 backgroundColor: "primary.dark",
               },
             }}
+            loading={isSubmitting}
           >
             {isSubmitting
               ? "Submitting..."

@@ -74,6 +74,7 @@ export default function Home() {
           className="w-full max-w-[90%] py-4 px-8 text-lg mt-auto"
           onClick={handleCreatePoll}
           disabled={isLoading}
+          loading={isLoading}
         >
           {isLoading ? "Creating Poll..." : "Create Poll"}
         </Button>
