@@ -15,6 +15,7 @@ import { getRangesOfDate } from "./lib/dates";
 import { SelectedRanges } from "./components/selected_ranges";
 import { DateBox } from "./components/date_box";
 import Tour from "@reactour/tour";
+import { FormControlLabel, Switch } from "@mui/material";
 
 const steps = [
   {
@@ -75,6 +76,7 @@ export default function DatePicker({
   className = "",
   currentUsername,
 }: DatePickerProps) {
+  const [showOtherUserRanges, setShowOtherUserRanges] = useState(false);
   const [currentDate, setCurrentDate] = useState(minDate || new Date());
   const [isSelecting, setIsSelecting] = useState(false);
   const [tempRange, setTempRange] = useState<{
@@ -308,6 +310,23 @@ export default function DatePicker({
           selectedType={selectedType}
           setSelectedType={setSelectedType}
         />
+        {currentUsername != null && (
+          <FormControlLabel
+            control={
+              <Switch
+                checked={showOtherUserRanges}
+                onChange={(e) => setShowOtherUserRanges(e.target.checked)}
+              />
+            }
+            label="Show others' availabilities"
+            sx={{
+              marginBottom: 2,
+              ".MuiFormControlLabel-label": {
+                color: "#000000",
+              },
+            }}
+          />
+        )}
 
         {/* Days of week header */}
         <div className="grid grid-cols-7 gap-1 mb-2 ">
@@ -331,7 +350,11 @@ export default function DatePicker({
                 isInTempRange={isDateInTempRange(date)}
                 selectedType={selectedType}
                 userRanges={userRanges}
-                otherUserRanges={currentUsername ? [] : otherUserRanges}
+                otherUserRanges={
+                  !showOtherUserRanges && currentUsername != null
+                    ? []
+                    : otherUserRanges
+                }
                 disabled={isDateDisabled(date) || !currentUsername}
                 onHover={() => handleDateHover(date)}
                 onClick={() => handleDateClick(date)}
