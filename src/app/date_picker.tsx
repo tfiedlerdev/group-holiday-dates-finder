@@ -105,7 +105,8 @@ export default function DatePicker({
   // Check if date is in temp range (currently being selected)
   const isDateInTempRange = useCallback(
     (date: Date) => {
-      if (!tempRange || !tempRange.end) return false;
+      if (!tempRange || !tempRange.end)
+        return date.getTime() === tempRange?.start.getTime();
       const start = new Date(tempRange.start);
       const end = new Date(tempRange.end);
       const minDate = start < end ? start : end;
