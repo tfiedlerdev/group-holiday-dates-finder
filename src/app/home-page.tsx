@@ -13,6 +13,7 @@ import Link from "next/link";
 interface PreviousPoll {
   id: string;
   title: string;
+  createdAt: string;
 }
 
 export default function HomePage() {
@@ -49,9 +50,17 @@ export default function HomePage() {
       const data = await response.json();
 
       if (data.success) {
-        // Store new poll in local storage
-        const newPoll = { id: data.poll.id, title: pollName };
-        const updatedPolls = [newPoll, ...previousPolls].slice(0, 5); // Keep last 5 polls
+        // Store new poll in local storage with creation date
+        const newPoll = {
+          id: data.poll.id,
+          title: pollName,
+          createdAt: new Date().toISOString(),
+        };
+        const updatedPolls = [newPoll, ...previousPolls].sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        );
+
         localStorage.setItem("previousPolls", JSON.stringify(updatedPolls));
 
         router.push(`/poll/${data.poll.id}/answer`);
@@ -189,9 +198,14 @@ export default function HomePage() {
                       key={poll.id}
                       className="block p-4 bg-slate-700/30 rounded-xl hover:bg-slate-700/50 transition-colors duration-200"
                     >
-                      <Typography variant="body1" sx={{ color: "#f8fafc" }}>
-                        {poll.title}
-                      </Typography>
+                      <div className="flex justify-between items-center">
+                        <Typography variant="body1" sx={{ color: "#f8fafc" }}>
+                          {poll.title}
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: "#94a3b8" }}>
+                          {new Date(poll.createdAt).toLocaleDateString()}
+                        </Typography>
+                      </div>
                     </Link>
                   ))}
                 </div>
