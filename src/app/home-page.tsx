@@ -9,26 +9,21 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import { Typography } from "@mui/material";
 import Link from "next/link";
-
-interface PreviousPoll {
-  id: string;
-  title: string;
-  createdAt: string;
-}
+import {
+  getPreviousPollsFromLocalStorage,
+  LocalPollAccess,
+} from "./lib/local_storage";
 
 export default function HomePage() {
   const [dates, setDates] = useState<[Date | null, Date | null] | null>(null);
   const [pollName, setPollName] = useState("Group Holiday Poll");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [previousPolls, setPreviousPolls] = useState<PreviousPoll[]>([]);
+  const [pollAccesses, setPreviousPolls] = useState<LocalPollAccess[]>([]);
   const router = useRouter();
 
   useEffect(() => {
-    const storedPolls = localStorage.getItem("previousPolls");
-    if (storedPolls) {
-      setPreviousPolls(JSON.parse(storedPolls));
-    }
+    setPreviousPolls(getPreviousPollsFromLocalStorage());
   }, []);
 
   const handleCreatePoll = React.useCallback(async () => {
@@ -50,19 +45,6 @@ export default function HomePage() {
       const data = await response.json();
 
       if (data.success) {
-        // Store new poll in local storage with creation date
-        const newPoll = {
-          id: data.poll.id,
-          title: pollName,
-          createdAt: new Date().toISOString(),
-        };
-        const updatedPolls = [newPoll, ...previousPolls].sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-        );
-
-        localStorage.setItem("previousPolls", JSON.stringify(updatedPolls));
-
         router.push(`/poll/${data.poll.id}/answer`);
       } else {
         setError(data.error || "Failed to create poll");
@@ -73,7 +55,7 @@ export default function HomePage() {
       setError("An unexpected error occurred. Please try again.");
       setIsLoading(false);
     }
-  }, [dates, pollName, router, previousPolls]);
+  }, [dates, pollName, router]);
 
   return (
     <>
@@ -183,27 +165,27 @@ export default function HomePage() {
               </div>
             </div>
 
-            {previousPolls.length > 0 && (
+            {pollAccesses.length > 0 && (
               <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 shadow-2xl">
                 <Typography
                   variant="h6"
                   sx={{ color: "#f8fafc", marginBottom: 2 }}
                 >
-                  Previously Created Polls
+                  Previously Visited Polls
                 </Typography>
                 <div className="space-y-2">
-                  {previousPolls.map((poll) => (
+                  {pollAccesses.map((access) => (
                     <Link
-                      href={`/poll/${poll.id}/answer`}
-                      key={poll.id}
+                      href={`/poll/${access.pollId}/answer`}
+                      key={access.pollId}
                       className="block p-4 bg-slate-700/30 rounded-xl hover:bg-slate-700/50 transition-colors duration-200"
                     >
                       <div className="flex justify-between items-center">
                         <Typography variant="body1" sx={{ color: "#f8fafc" }}>
-                          {poll.title}
+                          {access.pollTitle}
                         </Typography>
                         <Typography variant="body2" sx={{ color: "#94a3b8" }}>
-                          {new Date(poll.createdAt).toLocaleDateString()}
+                          {new Date(access.lastAccessed).toLocaleDateString()}
                         </Typography>
                       </div>
                     </Link>

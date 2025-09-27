@@ -10,6 +10,7 @@ import { useParams } from "next/navigation";
 import { DateRange as PrismaDateRange } from "@prisma/client";
 import { NameDialogButton } from "@/app/components/name_dialog_button";
 import { CheckIcon } from "@heroicons/react/24/outline";
+import { addPollRefToLocalStorage } from "@/app/lib/local_storage";
 
 const submitRanges = async (
   pollId: string,
@@ -104,6 +105,7 @@ export default function Home() {
           (range: PrismaDateRange) => range.userName === currentUsername,
         ) as DateRangeWithoutDisplayLevel[],
       );
+      addPollRefToLocalStorage(pollId, poll.title);
     },
     [currentUsername],
   );
