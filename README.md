@@ -3,6 +3,11 @@ It was created for the purpose of finding time ranges for group events.
 
 ## Getting Started
 
+### Database
+For local development, you need to locally serve a postgresql db.
+For that just execute `npm run db:reset`which will reset (if applicable) the existing local database, spin up a new docker container with a postgresql server running and run migrations on the database.
+
+### App
 First, run the development server:
 
 ```bash
