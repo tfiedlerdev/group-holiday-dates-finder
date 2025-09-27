@@ -5,7 +5,7 @@ import DatePicker, {
 } from "../../../components/date_picker";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { addDisplayLevel } from "../../../lib/dates";
-import { Button, CircularProgress, Typography } from "@mui/material";
+import { Button, CircularProgress, Link, Typography } from "@mui/material";
 import { useParams } from "next/navigation";
 import { DateRange as PrismaDateRange } from "@prisma/client";
 import { NameDialogButton } from "@/app/components/name_dialog_button";
@@ -193,6 +193,20 @@ export default function Home() {
             </Button>
           </div>
         )}
+        <Link
+          href="/"
+          sx={{
+            display: "block",
+            textAlign: "center",
+            marginTop: 4,
+            color: "primary.main",
+            "&:hover": {
+              color: "primary.dark",
+            },
+          }}
+        >
+          Create new poll
+        </Link>
       </main>
     </div>
   );
