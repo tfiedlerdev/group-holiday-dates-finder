@@ -9,11 +9,11 @@ import React, {
   useEffect,
 } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
-import { RangeTypeSelector } from "./components/range_type_selector";
+import { RangeTypeSelector } from "./range_type_selector";
 import { RangeType } from "@prisma/client";
-import { getRangesOfDate } from "./lib/dates";
-import { SelectedRanges } from "./components/selected_ranges";
-import { DateBox } from "./components/date_box";
+import { getRangesOfDate } from "../lib/dates";
+import { SelectedRanges } from "./selected_ranges";
+import { DateBox } from "./date_box";
 import Tour from "@reactour/tour";
 import { FormControlLabel, Switch } from "@mui/material";
 

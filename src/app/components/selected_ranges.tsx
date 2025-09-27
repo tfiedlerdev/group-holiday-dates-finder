@@ -1,5 +1,5 @@
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import { DateRangeWithoutDisplayLevel } from "../date_picker";
+import { DateRangeWithoutDisplayLevel } from "./date_picker";
 import { formatDate } from "../lib/dates";
 
 export function SelectedRanges({
