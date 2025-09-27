@@ -1,6 +1,6 @@
 "use client";
 import "primereact/resources/themes/bootstrap4-light-blue/theme.css";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Calendar } from "primereact/calendar";
 import { useRouter } from "next/navigation";
 
@@ -8,13 +8,27 @@ import Image from "next/image";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import { Typography } from "@mui/material";
+import Link from "next/link";
+
+interface PreviousPoll {
+  id: string;
+  title: string;
+}
 
 export default function HomePage() {
   const [dates, setDates] = useState<[Date | null, Date | null] | null>(null);
   const [pollName, setPollName] = useState("Group Holiday Poll");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [previousPolls, setPreviousPolls] = useState<PreviousPoll[]>([]);
   const router = useRouter();
+
+  useEffect(() => {
+    const storedPolls = localStorage.getItem("previousPolls");
+    if (storedPolls) {
+      setPreviousPolls(JSON.parse(storedPolls));
+    }
+  }, []);
 
   const handleCreatePoll = React.useCallback(async () => {
     setIsLoading(true);
@@ -35,6 +49,11 @@ export default function HomePage() {
       const data = await response.json();
 
       if (data.success) {
+        // Store new poll in local storage
+        const newPoll = { id: data.poll.id, title: pollName };
+        const updatedPolls = [newPoll, ...previousPolls].slice(0, 5); // Keep last 5 polls
+        localStorage.setItem("previousPolls", JSON.stringify(updatedPolls));
+
         router.push(`/poll/${data.poll.id}/answer`);
       } else {
         setError(data.error || "Failed to create poll");
@@ -45,9 +64,7 @@ export default function HomePage() {
       setError("An unexpected error occurred. Please try again.");
       setIsLoading(false);
     }
-  }, [dates, pollName, router]);
-
-  console.log("button dsiabled: ", isLoading || !pollName.trim());
+  }, [dates, pollName, router, previousPolls]);
 
   return (
     <>
@@ -78,6 +95,12 @@ export default function HomePage() {
           {/* Form Section */}
           <div className="max-w-2xl mx-auto space-y-8">
             <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 shadow-2xl">
+              <Typography
+                variant="h6"
+                sx={{ color: "#f8fafc", marginBottom: 2 }}
+              >
+                New Poll
+              </Typography>
               <TextField
                 fullWidth
                 label="Poll Name"
@@ -150,6 +173,30 @@ export default function HomePage() {
                 </Button>
               </div>
             </div>
+
+            {previousPolls.length > 0 && (
+              <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 shadow-2xl">
+                <Typography
+                  variant="h6"
+                  sx={{ color: "#f8fafc", marginBottom: 2 }}
+                >
+                  Previously Created Polls
+                </Typography>
+                <div className="space-y-2">
+                  {previousPolls.map((poll) => (
+                    <Link
+                      href={`/poll/${poll.id}/answer`}
+                      key={poll.id}
+                      className="block p-4 bg-slate-700/30 rounded-xl hover:bg-slate-700/50 transition-colors duration-200"
+                    >
+                      <Typography variant="body1" sx={{ color: "#f8fafc" }}>
+                        {poll.title}
+                      </Typography>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
