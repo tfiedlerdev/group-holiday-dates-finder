@@ -5,40 +5,55 @@ import CssBaseline from "@mui/material/CssBaseline";
 const darkTheme = createTheme({
   palette: {
     mode: "dark",
+    // Beautiful indigo primary color - sophisticated and modern
     primary: {
-      main: "#3b82f6",
-      dark: "#2563eb",
-      light: "#60a5fa",
-    },
-    secondary: {
-      main: "#9e9e9e",
-      dark: "#757575",
-      light: "#bdbdbd",
+      main: "#6366f1", // Indigo 500 - more vibrant than blue
+      dark: "#4f46e5", // Indigo 600
+      light: "#818cf8", // Indigo 400
       contrastText: "#ffffff",
     },
+    // Elegant purple secondary - complements indigo beautifully
+    secondary: {
+      main: "#8b5cf6", // Violet 500
+      dark: "#7c3aed", // Violet 600
+      light: "#a78bfa", // Violet 400
+      contrastText: "#ffffff",
+    },
+    // Rich dark backgrounds with subtle warmth
     background: {
-      default: "#1f2937",
-      paper: "#374151",
+      default: "#0f172a", // Slate 900 - deeper, more sophisticated
+      paper: "#1e293b", // Slate 800 - warmer than gray
     },
+    // Refined text colors with better contrast
     text: {
-      primary: "#f9fafb",
-      secondary: "#d1d5db",
+      primary: "#f8fafc", // Slate 50 - pure white with subtle warmth
+      secondary: "#cbd5e1", // Slate 300 - softer secondary text
     },
-    // Add error, warning, success colors for consistency
+    // Beautiful Material UI colors for status
     error: {
-      main: "#ef4444",
-      light: "#fecaca",
-      dark: "#dc2626",
+      main: "#ef4444", // Red 500 - vibrant error color
+      light: "#fca5a5", // Red 300
+      dark: "#dc2626", // Red 600
+      contrastText: "#ffffff",
     },
     warning: {
-      main: "#f59e0b",
-      light: "#fde68a",
-      dark: "#d97706",
+      main: "#f59e0b", // Amber 500 - warm warning color
+      light: "#fcd34d", // Amber 300
+      dark: "#d97706", // Amber 600
+      contrastText: "#ffffff",
     },
     success: {
-      main: "#10b981",
-      light: "#a7f3d0",
-      dark: "#059669",
+      main: "#10b981", // Emerald 500 - fresh success color
+      light: "#6ee7b7", // Emerald 300
+      dark: "#059669", // Emerald 600
+      contrastText: "#ffffff",
+    },
+    // Additional Material UI colors for enhanced palette
+    info: {
+      main: "#06b6d4", // Cyan 500 - beautiful info color
+      light: "#67e8f9", // Cyan 300
+      dark: "#0891b2", // Cyan 600
+      contrastText: "#ffffff",
     },
   },
   typography: {
@@ -101,8 +116,8 @@ const darkTheme = createTheme({
       styleOverrides: {
         // Replace the body styles from globals.css
         body: {
-          backgroundColor: "#1f2937", // dark background
-          color: "#f9fafb", // light text
+          backgroundColor: "#0f172a", // Slate 900 - deeper, more sophisticated
+          color: "#f8fafc", // Slate 50 - pure white with subtle warmth
           fontFamily: [
             "var(--font-geist-sans)",
             "-apple-system",
@@ -129,16 +144,16 @@ const darkTheme = createTheme({
         },
         // Support for CSS custom properties from globals.css
         ":root": {
-          "--background": "#1f2937",
-          "--foreground": "#f9fafb",
-          "--color-background": "#1f2937",
-          "--color-foreground": "#f9fafb",
+          "--background": "#0f172a",
+          "--foreground": "#f8fafc",
+          "--color-background": "#0f172a",
+          "--color-foreground": "#f8fafc",
         },
         // Dark mode support (since we're using dark theme by default)
         "@media (prefers-color-scheme: dark)": {
           ":root": {
-            "--background": "#1f2937",
-            "--foreground": "#f9fafb",
+            "--background": "#0f172a",
+            "--foreground": "#f8fafc",
           },
         },
       },
@@ -147,21 +162,21 @@ const darkTheme = createTheme({
       styleOverrides: {
         root: {
           "& .MuiOutlinedInput-root": {
-            color: "#f9fafb",
+            color: "#f8fafc", // Slate 50
             "& fieldset": {
-              borderColor: "#6b7280",
+              borderColor: "#475569", // Slate 600 - softer borders
             },
             "&:hover fieldset": {
-              borderColor: "#9ca3af",
+              borderColor: "#64748b", // Slate 500 - subtle hover
             },
             "&.Mui-focused fieldset": {
-              borderColor: "#3b82f6",
+              borderColor: "#6366f1", // Indigo 500 - beautiful focus
             },
           },
           "& .MuiInputLabel-root": {
-            color: "#9ca3af",
+            color: "#94a3b8", // Slate 400 - softer labels
             "&.Mui-focused": {
-              color: "#3b82f6",
+              color: "#6366f1", // Indigo 500
             },
           },
         },
@@ -173,37 +188,82 @@ const darkTheme = createTheme({
           textTransform: "none",
           fontWeight: 500,
           borderRadius: 8,
-          // Only apply blue background to primary buttons
-          "&.MuiButton-contained": {
-            backgroundColor: "#3b82f6",
-            "&:hover": {
-              backgroundColor: "#2563eb",
-            },
+        },
+        // Override ALL contained buttons (including default primary)
+        contained: {
+          backgroundColor: "#6366f1", // Indigo 500
+          color: "#ffffff",
+          "&:hover": {
+            backgroundColor: "#4f46e5", // Indigo 600
           },
-          // Secondary buttons should use the secondary color
-          "&.MuiButton-contained.MuiButton-colorSecondary": {
-            backgroundColor: "#9e9e9e",
-            "&:hover": {
-              backgroundColor: "#757575",
-            },
+          "&:focus": {
+            backgroundColor: "#4f46e5",
           },
-          // Outlined buttons should be transparent with colored borders
-          "&.MuiButton-outlined": {
-            backgroundColor: "transparent",
-            borderColor: "#6b7280",
-            color: "#f9fafb",
-            "&:hover": {
-              backgroundColor: "rgba(255, 255, 255, 0.08)",
-              borderColor: "#9ca3af",
-            },
+          "&:active": {
+            backgroundColor: "#4338ca", // Indigo 700
           },
-          "&.MuiButton-outlined.MuiButton-colorSecondary": {
-            borderColor: "#9e9e9e",
-            color: "#9e9e9e",
-            "&:hover": {
-              backgroundColor: "rgba(158, 158, 158, 0.08)",
-              borderColor: "#bdbdbd",
-            },
+        },
+        // Override primary contained buttons specifically
+        containedPrimary: {
+          backgroundColor: "#6366f1 !important", // Indigo 500 - force override
+          color: "#ffffff !important",
+          "&:hover": {
+            backgroundColor: "#4f46e5 !important", // Indigo 600
+          },
+          "&:focus": {
+            backgroundColor: "#4f46e5 !important",
+          },
+          "&:active": {
+            backgroundColor: "#4338ca !important", // Indigo 700
+          },
+          "&:disabled": {
+            backgroundColor: "rgba(100, 116, 139, 0.3) !important", // Slate 500 with opacity
+            color: "rgba(148, 163, 184, 0.5) !important", // Slate 400 with opacity
+            cursor: "not-allowed",
+          },
+        },
+        // Override secondary contained buttons
+        containedSecondary: {
+          backgroundColor: "#8b5cf6 !important", // Violet 500
+          color: "#ffffff !important",
+          "&:hover": {
+            backgroundColor: "#7c3aed !important", // Violet 600
+          },
+          "&:focus": {
+            backgroundColor: "#7c3aed !important",
+          },
+          "&:active": {
+            backgroundColor: "#6d28d9 !important", // Violet 700
+          },
+        },
+        // Override outlined buttons
+        outlined: {
+          backgroundColor: "transparent",
+          borderColor: "#6366f1", // Indigo 500
+          color: "#6366f1",
+          "&:hover": {
+            backgroundColor: "rgba(99, 102, 241, 0.08)", // Subtle indigo overlay
+            borderColor: "#4f46e5", // Indigo 600
+          },
+        },
+        // Override outlined primary buttons
+        outlinedPrimary: {
+          backgroundColor: "transparent",
+          borderColor: "#6366f1 !important", // Indigo 500
+          color: "#6366f1 !important",
+          "&:hover": {
+            backgroundColor: "rgba(99, 102, 241, 0.08) !important", // Subtle indigo overlay
+            borderColor: "#4f46e5 !important", // Indigo 600
+          },
+        },
+        // Override outlined secondary buttons
+        outlinedSecondary: {
+          backgroundColor: "transparent",
+          borderColor: "#8b5cf6 !important", // Violet 500
+          color: "#8b5cf6 !important",
+          "&:hover": {
+            backgroundColor: "rgba(139, 92, 246, 0.08) !important", // Subtle violet overlay
+            borderColor: "#7c3aed !important", // Violet 600
           },
         },
       },
@@ -216,14 +276,14 @@ const darkTheme = createTheme({
         },
       },
     },
-    // Style links consistently
+    // Style links consistently with beautiful indigo
     MuiLink: {
       styleOverrides: {
         root: {
-          color: "#3b82f6",
+          color: "#6366f1", // Indigo 500
           textDecoration: "none",
           "&:hover": {
-            color: "#2563eb",
+            color: "#4f46e5", // Indigo 600
             textDecoration: "underline",
           },
         },
@@ -237,12 +297,12 @@ const darkTheme = createTheme({
         },
       },
     },
-    // Style Paper components consistently
+    // Style Paper components with sophisticated slate colors
     MuiPaper: {
       styleOverrides: {
         root: {
-          backgroundColor: "#374151",
-          color: "#f9fafb",
+          backgroundColor: "#1e293b", // Slate 800 - warmer than gray
+          color: "#f8fafc", // Slate 50
         },
       },
     },
