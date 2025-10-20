@@ -1,5 +1,4 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-It was created for the purpose of finding time ranges for group events.
+This is a [Next.js](https://nextjs.org) project to find common date availabilities for groups. Hosted at https://rather-not.vercel.app/ 
 
 ## Getting Started
 
